@@ -1,0 +1,34 @@
+{
+  "name": "School Management System DKI Jakarta",
+  "short_name": "SMS Sekolah",
+  "description": "Aplikasi pengelolaan akademik dan operasional sekolah terpadu.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#800000",
+  "lang": "id-ID",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/pwa-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
