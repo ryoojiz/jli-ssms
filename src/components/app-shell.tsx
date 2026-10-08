@@ -3,7 +3,6 @@ import logoDkiAsset from "@/assets/logo-dki.png.asset.json";
 import logoJliAsset from "@/assets/logo-jli.png.asset.json";
 import {
   BarChart3,
-
   BookOpen,
   Boxes,
   CalendarCheck,
@@ -82,7 +81,6 @@ export const MODUL_PATH: Record<string, Modul> = Object.fromEntries(
   NAV.flatMap((g) => g.item.map((i) => [i.to, i.modul as Modul])),
 );
 
-
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const { bolehAkses: bolehLihat, sesi } = useAuth();
   const labelWali: Partial<Record<Modul, string>> = {
@@ -94,7 +92,6 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     komunikasi: "Informasi Sekolah",
   };
   return (
-
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
       <div className="pita-merah-putih h-1 w-full shrink-0" />
       <div className="flex items-center gap-3 px-5 py-5">
@@ -134,7 +131,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                       }}
                     >
                       <item.icon className="size-4 shrink-0" aria-hidden />
-                      {sesi?.peran === "walimurid" ? labelWali[item.modul] ?? item.label : item.label}
+                      {sesi?.peran === "walimurid"
+                        ? (labelWali[item.modul] ?? item.label)
+                        : item.label}
                     </Link>
                   </li>
                 ))}
@@ -143,7 +142,6 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           );
         })}
       </nav>
-
 
       <div className="flex items-center justify-between gap-3 border-t border-sidebar-border px-5 py-4 text-xs text-sidebar-foreground/70">
         <div className="min-w-0">
@@ -165,7 +163,12 @@ const MOBILE_NAV = [
   { to: "/akademik", modul: "akademik", label: "Akademik", icon: GraduationCap },
   { to: "/kehadiran", modul: "kehadiran", label: "Hadir", icon: CalendarCheck },
   { to: "/siswa-saya", modul: "akademik", label: "Siswa", icon: Users },
-] as const satisfies ReadonlyArray<{ to: string; modul: Modul; label: string; icon: typeof Shield }>;
+] as const satisfies ReadonlyArray<{
+  to: string;
+  modul: Modul;
+  label: string;
+  icon: typeof Shield;
+}>;
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -173,7 +176,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const modul = MODUL_PATH[pathname];
-  const ruteGuru = pathname === "/siswa-saya" || pathname.startsWith("/tugas/") || pathname.startsWith("/ujian/");
+  const ruteGuru =
+    pathname === "/siswa-saya" || pathname.startsWith("/tugas/") || pathname.startsWith("/ujian/");
   const labelMobileWali: Partial<Record<Modul, string>> = {
     beranda: "Anak",
     akademik: "Akademik",
@@ -214,7 +218,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   return (
-
     <div className="min-h-screen bg-background lg:grid lg:grid-cols-[17rem_1fr]">
       <aside className="sticky top-0 hidden h-screen lg:block">
         <SidebarContent />
@@ -266,7 +269,6 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Input placeholder="Cari siswa, aset, transaksi…" className="pl-9" />
             </div>
 
-
             <div className="flex shrink-0 items-center gap-1.5">
               <img
                 src={logoJliAsset.url}
@@ -274,44 +276,51 @@ export function AppShell({ children }: { children: ReactNode }) {
                 className="h-8 w-12 shrink-0 object-contain object-right lg:hidden"
               />
               <div className="flex shrink-0 items-center gap-2 rounded-md border border-border py-1 pl-1.5 pr-1 sm:py-1.5 sm:pl-2 sm:pr-1.5">
-              <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                {inisial(sesi.nama)}
-              </span>
-              <div className="hidden text-right sm:block">
-                <p className="text-xs font-semibold leading-tight">{sesi.nama}</p>
-                <p className="text-[0.7rem] leading-tight text-muted-foreground">
-                  {PERAN_LABEL[sesi.peran]}
-                  {sesi.konteks ? ` · ${sesi.konteks}` : ""}
-                </p>
-              </div>
-              <Button
-                size="icon"
-                variant="ghost"
-                aria-label="Keluar"
-                title="Keluar"
-                onClick={() => {
-                  keluar();
-                  navigate({ to: "/auth", replace: true });
-                }}
-              >
-                <LogOut className="size-4" />
-              </Button>
+                <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                  {inisial(sesi.nama)}
+                </span>
+                <div className="hidden text-right sm:block">
+                  <p className="text-xs font-semibold leading-tight">{sesi.nama}</p>
+                  <p className="text-[0.7rem] leading-tight text-muted-foreground">
+                    {PERAN_LABEL[sesi.peran]}
+                    {sesi.konteks ? ` · ${sesi.konteks}` : ""}
+                  </p>
+                </div>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  aria-label="Keluar"
+                  title="Keluar"
+                  onClick={() => {
+                    keluar();
+                    navigate({ to: "/auth", replace: true });
+                  }}
+                >
+                  <LogOut className="size-4" />
+                </Button>
               </div>
             </div>
-
           </div>
         </header>
 
-        <main className="flex-1 px-4 py-5 pb-24 sm:px-6 sm:py-6 sm:pb-24 lg:px-8 lg:pb-6">{children}</main>
+        <main className="flex-1 px-4 py-5 pb-24 sm:px-6 sm:py-6 sm:pb-24 lg:px-8 lg:pb-6">
+          {children}
+        </main>
 
         <footer className="hidden border-t border-border px-4 py-4 text-xs text-muted-foreground sm:px-6 lg:block lg:px-8">
-          JLI@2026 · Waktu tampil zona Asia/Jakarta (UTC+7) · Audit trail aktif untuk seluruh
-          transaksi kritikal.
+          JLI@2026 · Zona Asia/Jakarta (UTC+7) · Mode demo; transaksi baru kehadiran, komunikasi,
+          gudang, booking, dan nilai tersimpan hanya di browser ini.
         </footer>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-border bg-card/95 px-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-4px_16px_rgb(0_0_0/0.08)] backdrop-blur lg:hidden" aria-label="Navigasi utama ponsel">
-        {MOBILE_NAV.filter((item) => bolehAkses(item.modul) && !(sesi.peran === "walimurid" && item.to === "/siswa-saya")).map((item) => (
+      <nav
+        className="fixed inset-x-0 bottom-0 z-40 flex border-t border-border bg-card/95 px-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-4px_16px_rgb(0_0_0/0.08)] backdrop-blur lg:hidden"
+        aria-label="Navigasi utama ponsel"
+      >
+        {MOBILE_NAV.filter(
+          (item) =>
+            bolehAkses(item.modul) && !(sesi.peran === "walimurid" && item.to === "/siswa-saya"),
+        ).map((item) => (
           <Link
             key={item.to}
             to={item.to}
@@ -321,7 +330,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           >
             <item.icon className="size-5 shrink-0" aria-hidden />
             <span className="truncate">
-              {sesi.peran === "walimurid" ? labelMobileWali[item.modul] ?? item.label : item.label}
+              {sesi.peran === "walimurid"
+                ? (labelMobileWali[item.modul] ?? item.label)
+                : item.label}
             </span>
           </Link>
         ))}
@@ -388,11 +399,42 @@ export function StatusPill({
 
 export function nadaStatus(status: string): keyof typeof NADA {
   const s = status.toLowerCase();
-  if (["hadir", "disetujui", "selesai", "baik", "tersedia", "online", "terkirim", "dikembalikan", "aktif", "normal"].some((k) => s.includes(k)))
+  if (
+    [
+      "hadir",
+      "disetujui",
+      "selesai",
+      "baik",
+      "tersedia",
+      "online",
+      "terkirim",
+      "dikembalikan",
+      "aktif",
+      "normal",
+    ].some((k) => s.includes(k))
+  )
     return "baik";
-  if (["menunggu", "terlambat", "izin", "berjalan", "perbaikan", "dijadwalkan", "sedang", "perlu", "rusak ringan", "draft", "terjadwal"].some((k) => s.includes(k)))
+  if (
+    [
+      "menunggu",
+      "terlambat",
+      "izin",
+      "berjalan",
+      "perbaikan",
+      "dijadwalkan",
+      "sedang",
+      "perlu",
+      "rusak ringan",
+      "draft",
+      "terjadwal",
+    ].some((k) => s.includes(k))
+  )
     return "peringatan";
-  if (["alfa", "ditolak", "gagal", "offline", "terbuka", "tinggi", "rusak berat", "rujukan"].some((k) => s.includes(k)))
+  if (
+    ["alfa", "ditolak", "gagal", "offline", "terbuka", "tinggi", "rusak berat", "rujukan"].some(
+      (k) => s.includes(k),
+    )
+  )
     return "bahaya";
   return "netral";
 }

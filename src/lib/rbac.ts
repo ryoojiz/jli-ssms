@@ -87,12 +87,21 @@ export const IZIN: Record<Peran, Modul[]> = {
   kepala_sekolah: SEMUA_MODUL,
   operator: SEMUA_MODUL,
   auditor: SEMUA_MODUL,
-  guru: ["beranda", "lokasi", "akademik", "kehadiran", "kelas-digital", "komunikasi"],
+  guru: [
+    "beranda",
+    "lokasi",
+    "akademik",
+    "kehadiran",
+    "perpustakaan",
+    "kelas-digital",
+    "komunikasi",
+  ],
   wali_kelas: [
     "beranda",
     "lokasi",
     "akademik",
     "kehadiran",
+    "perpustakaan",
     "kesehatan",
     "kelas-digital",
     "komunikasi",
@@ -104,7 +113,15 @@ export const IZIN: Record<Peran, Modul[]> = {
   uks: ["beranda", "lokasi", "kesehatan", "kehadiran", "komunikasi"],
   keamanan: ["beranda", "lokasi", "keamanan", "komunikasi"],
   walimurid: ["beranda", "akademik", "kehadiran", "kesehatan", "perpustakaan", "komunikasi"],
-  siswa: ["beranda", "lokasi", "akademik", "kehadiran", "kelas-digital", "perpustakaan", "komunikasi"],
+  siswa: [
+    "beranda",
+    "lokasi",
+    "akademik",
+    "kehadiran",
+    "kelas-digital",
+    "perpustakaan",
+    "komunikasi",
+  ],
 };
 
 /** Peran yang boleh melakukan perubahan data (tulis) pada modul yang diizinkan. */
@@ -126,22 +143,82 @@ export type Sesi = {
   konteks?: string;
   /** ID anak terkait untuk akun wali murid/siswa pada data demo. */
   siswaId?: string;
+  /** ID guru demo untuk atribusi aktivitas akademik; tidak dipakai sebagai autentikasi produksi. */
+  guruId?: string;
 };
 
 /** Akun demo untuk mencoba tiap peran sebelum Lovable Cloud aktif. */
 export const AKUN_DEMO: Array<Sesi & { kataSandi: string }> = [
-  { nama: "Yulia Kratiningsih S.Pd", email: "kepsek@sdn01.sch.id", peran: "kepala_sekolah", kataSandi: "demo1234" },
-  { nama: "Rizky Ananda", email: "operator@sdn01.sch.id", peran: "operator", kataSandi: "demo1234" },
-  { nama: "Budi Santoso, S.Pd.", email: "guru@sdn01.sch.id", peran: "guru", kataSandi: "demo1234", konteks: "Matematika" },
-  { nama: "Siti Rahmawati, S.Pd.", email: "walikelas@sdn01.sch.id", peran: "wali_kelas", kataSandi: "demo1234", konteks: "Kelas 5A" },
-  { nama: "Hendra Kurniawan", email: "bendahara@sdn01.sch.id", peran: "bendahara", kataSandi: "demo1234" },
-  { nama: "Maya Puspita", email: "pustakawan@sdn01.sch.id", peran: "pustakawan", kataSandi: "demo1234" },
+  {
+    nama: "Yulia Kratiningsih S.Pd",
+    email: "kepsek@sdn01.sch.id",
+    peran: "kepala_sekolah",
+    kataSandi: "demo1234",
+  },
+  {
+    nama: "Rizky Ananda",
+    email: "operator@sdn01.sch.id",
+    peran: "operator",
+    kataSandi: "demo1234",
+  },
+  {
+    nama: "Larasati, S.Pd.",
+    email: "guru@sdn01.sch.id",
+    peran: "guru",
+    kataSandi: "demo1234",
+    konteks: "Bahasa Inggris",
+    guruId: "G10",
+  },
+  {
+    nama: "Siti Rohmah, S.Pd.",
+    email: "walikelas@sdn01.sch.id",
+    peran: "wali_kelas",
+    kataSandi: "demo1234",
+    konteks: "Kelas 5A",
+    guruId: "G06",
+  },
+  {
+    nama: "Hendra Kurniawan",
+    email: "bendahara@sdn01.sch.id",
+    peran: "bendahara",
+    kataSandi: "demo1234",
+  },
+  {
+    nama: "Maya Puspita",
+    email: "pustakawan@sdn01.sch.id",
+    peran: "pustakawan",
+    kataSandi: "demo1234",
+  },
   { nama: "Agus Setiawan", email: "sarpras@sdn01.sch.id", peran: "sarpras", kataSandi: "demo1234" },
   { nama: "Ns. Dewi Lestari", email: "uks@sdn01.sch.id", peran: "uks", kataSandi: "demo1234" },
-  { nama: "Joko Prasetyo", email: "keamanan@sdn01.sch.id", peran: "keamanan", kataSandi: "demo1234" },
-  { nama: "Ibu Ratna (Wali Aisyah)", email: "walimurid@gmail.com", peran: "walimurid", kataSandi: "demo1234", konteks: "Aisyah Putri — 5A", siswaId: "K5A-S01" },
-  { nama: "Aisyah Putri", email: "siswa@sdn01.sch.id", peran: "siswa", kataSandi: "demo1234", konteks: "Kelas 5A", siswaId: "K5A-S01" },
-  { nama: "Inspektorat Dinas", email: "auditor@jakarta.go.id", peran: "auditor", kataSandi: "demo1234" },
+  {
+    nama: "Joko Prasetyo",
+    email: "keamanan@sdn01.sch.id",
+    peran: "keamanan",
+    kataSandi: "demo1234",
+  },
+  {
+    nama: "Ibu Ratna (Wali Aisyah)",
+    email: "walimurid@gmail.com",
+    peran: "walimurid",
+    kataSandi: "demo1234",
+    konteks: "Aisyah Putri — 5A",
+    siswaId: "K5A-S01",
+  },
+  {
+    nama: "Aisyah Putri",
+    email: "siswa@sdn01.sch.id",
+    peran: "siswa",
+    kataSandi: "demo1234",
+    konteks: "Kelas 5A",
+    siswaId: "K5A-S01",
+  },
+  {
+    nama: "Inspektorat Dinas",
+    email: "auditor@jakarta.go.id",
+    peran: "auditor",
+    kataSandi: "demo1234",
+  },
 ];
 
 export function inisial(nama: string) {

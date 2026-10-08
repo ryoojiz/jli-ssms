@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { namaKelas } from "@/lib/demo-data";
 import { pengumpulanTugas, tautanWhatsApp, tugasById } from "@/lib/guru-data";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/tugas/$tugasId")({
   head: () => ({
@@ -31,18 +32,35 @@ export const Route = createFileRoute("/tugas/$tugasId")({
 });
 
 function PenilaianTugas() {
+  const { sesi } = useAuth();
   const { tugasId } = Route.useParams();
   const tugas = tugasById(tugasId);
   const baris = useMemo(() => pengumpulanTugas(tugasId), [tugasId]);
   const [nilai, setNilai] = useState<Record<string, string>>(() =>
     Object.fromEntries(baris.map((b) => [b.siswa.id, b.nilaiAwal ? String(b.nilaiAwal) : ""])),
   );
-  const [pesan, setPesan] = useState<string | null>(null);
+
+  if (
+    !sesi ||
+    !["guru", "wali_kelas", "operator", "kepala_sekolah", "auditor"].includes(sesi.peran)
+  ) {
+    return (
+      <AppShell>
+        <PageHeader
+          judul="Akses terbatas"
+          deskripsi="Rincian nilai tugas contoh hanya untuk staf sekolah yang berwenang."
+        />
+      </AppShell>
+    );
+  }
 
   if (!tugas) {
     return (
       <AppShell>
-        <PageHeader judul="Tugas tidak ditemukan" deskripsi="Tugas yang Anda buka tidak tersedia." />
+        <PageHeader
+          judul="Tugas tidak ditemukan"
+          deskripsi="Tugas yang Anda buka tidak tersedia."
+        />
         <Button asChild variant="outline">
           <Link to="/akademik">
             <ArrowLeft className="size-4" /> Kembali ke Akademik
@@ -59,7 +77,7 @@ function PenilaianTugas() {
     <AppShell>
       <PageHeader
         judul={tugas.judul}
-        deskripsi={`${tugas.mapel} · Kelas ${namaKelas(tugas.kelasId)} · Tenggat ${tugas.tenggat}`}
+        deskripsi={`${tugas.mapel} · Kelas ${namaKelas(tugas.kelasId)} · Tenggat ${tugas.tenggat} · data contoh statis; input nilai baru ada di tab Nilai demo pada Akademik.`}
         aksi={
           <>
             <Button asChild variant="outline">
@@ -67,33 +85,47 @@ function PenilaianTugas() {
                 <ArrowLeft className="size-4" /> Kembali
               </Link>
             </Button>
-            <Button onClick={() => setPesan(`Penilaian tersimpan untuk ${dinilai.length} siswa.`)}>
-              <Save className="size-4" /> Simpan penilaian
-            </Button>
           </>
         }
       />
 
-      {pesan ? (
-        <p role="status" className="mb-4 rounded-md bg-success/12 px-3 py-2 text-sm text-success">
-          {pesan}
-        </p>
-      ) : null}
-
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total siswa" nilai={baris.length} keterangan={`Kelas ${namaKelas(tugas.kelasId)}`} icon={ClipboardList} />
-        <StatCard label="Sudah mengumpulkan" nilai={baris.length - belum.length} keterangan="Termasuk terlambat" icon={CheckCircle2} />
-        <StatCard label="Belum mengumpulkan" nilai={belum.length} keterangan="Perlu ditindaklanjuti" icon={XCircle} />
-        <StatCard label="Sudah dinilai" nilai={dinilai.length} keterangan="Skala 0–100" icon={Save} />
+        <StatCard
+          label="Total siswa"
+          nilai={baris.length}
+          keterangan={`Kelas ${namaKelas(tugas.kelasId)}`}
+          icon={ClipboardList}
+        />
+        <StatCard
+          label="Sudah mengumpulkan"
+          nilai={baris.length - belum.length}
+          keterangan="Termasuk terlambat"
+          icon={CheckCircle2}
+        />
+        <StatCard
+          label="Belum mengumpulkan"
+          nilai={belum.length}
+          keterangan="Perlu ditindaklanjuti"
+          icon={XCircle}
+        />
+        <StatCard
+          label="Sudah dinilai"
+          nilai={dinilai.length}
+          keterangan="Skala 0–100"
+          icon={Save}
+        />
       </section>
 
       <div className="mt-6">
         <TabelData
           judul="Pengumpulan & penilaian"
-          deskripsi="Isi kolom nilai untuk siswa yang sudah mengumpulkan; hubungi wali untuk yang belum."
+          deskripsi="Nilai dan status di halaman ini adalah contoh statis, bukan entri yang tersimpan. Buat penilaian pada tab Nilai demo."
           data={baris}
           kolom={[
-            { judul: "Nama siswa", render: (b) => <span className="font-medium">{b.siswa.nama}</span> },
+            {
+              judul: "Nama siswa",
+              render: (b) => <span className="font-medium">{b.siswa.nama}</span>,
+            },
             { judul: "NISN", render: (b) => b.siswa.nisn },
             {
               judul: "Status",
@@ -113,11 +145,10 @@ function PenilaianTugas() {
                   min={0}
                   max={100}
                   disabled={!b.sudah}
+                  readOnly
                   aria-label={`Nilai ${b.siswa.nama}`}
                   value={nilai[b.siswa.id] ?? ""}
-                  onChange={(e) =>
-                    setNilai((n) => ({ ...n, [b.siswa.id]: e.target.value }))
-                  }
+                  onChange={(e) => setNilai((n) => ({ ...n, [b.siswa.id]: e.target.value }))}
                   className="ml-auto w-20 text-right"
                 />
               ),

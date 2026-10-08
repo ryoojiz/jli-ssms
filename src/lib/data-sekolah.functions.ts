@@ -76,17 +76,22 @@ export const imporDataSekolah = createServerFn({ method: "POST" })
   });
 
 export const ambilDataSekolah = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const [g, k, s, h] = await Promise.all([
-    supabaseAdmin.from("guru").select("nip,nama,mapel,status,wali_kelas"),
-    supabaseAdmin.from("kelas").select("id,tingkat,nip_wali,ruang,kapasitas"),
-    supabaseAdmin.from("siswa").select("nisn,nama,jenis_kelamin,kelas_id,nama_ayah,nama_ibu,nama_wali,telp_wali"),
-    supabaseAdmin.from("kehadiran").select("tanggal,nisn,kelas_id,status"),
-  ]);
-  const err = g.error || k.error || s.error || h.error;
-  if (err) {
-    console.error(err);
-    return { guru: [], kelas: [], siswa: [], kehadiran: [], error: "Database tidak dapat dibaca." };
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [g, k, s, h] = await Promise.all([
+      supabaseAdmin.from("guru").select("nip,nama,mapel,status,wali_kelas"),
+      supabaseAdmin.from("kelas").select("id,tingkat,nip_wali,ruang,kapasitas"),
+      supabaseAdmin.from("siswa").select("nisn,nama,jenis_kelamin,kelas_id,nama_ayah,nama_ibu,nama_wali,telp_wali"),
+      supabaseAdmin.from("kehadiran").select("tanggal,nisn,kelas_id,status"),
+    ]);
+    const err = g.error || k.error || s.error || h.error;
+    if (err) {
+      console.error(err);
+      return { guru: [], kelas: [], siswa: [], kehadiran: [], error: "Database tidak dapat dibaca." };
+    }
+    return { guru: g.data, kelas: k.data, siswa: s.data, kehadiran: h.data, error: null as string | null };
+  } catch (error) {
+    console.warn("Data Cloud tidak tersedia; data contoh tetap digunakan.", error);
+    return { guru: [], kelas: [], siswa: [], kehadiran: [], error: "Data Cloud tidak tersedia." };
   }
-  return { guru: g.data, kelas: k.data, siswa: s.data, kehadiran: h.data, error: null as string | null };
 });

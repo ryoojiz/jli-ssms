@@ -170,14 +170,20 @@ export const JADWAL: Jadwal[] = KELAS.flatMap((k, ki) =>
   HARI.flatMap((hari, hi) =>
     JAM.map(([mulai, selesai], ji) => {
       const idx = ki * 20 + hi * 4 + ji;
+      const mapel = MAPEL[seeded(idx + 2, MAPEL.length)]!;
+      const guru = mapel === "Bahasa Inggris" && ["K4A", "K5A", "K6A"].includes(k.id)
+        ? GURU.find((g) => g.id === "G10")!.nama
+        : k.id === "K5A" && !["PAI & Budi Pekerti", "PJOK"].includes(mapel)
+          ? GURU.find((g) => g.id === "G06")!.nama
+          : GURU[seeded(idx + 6, GURU.length)]!.nama;
       return {
         id: `J-${idx}`,
         hari,
         jamMulai: mulai!,
         jamSelesai: selesai!,
         kelasId: k.id,
-        mapel: MAPEL[seeded(idx + 2, MAPEL.length)]!,
-        guru: GURU[seeded(idx + 6, GURU.length)]!.nama,
+        mapel,
+        guru,
         ruang: k.ruang,
       };
     }),

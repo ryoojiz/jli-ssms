@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SISWA, namaKelas } from "@/lib/demo-data";
 import { nilaiUjianAwal, ujianById } from "@/lib/guru-data";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/ujian/$ujianId")({
   head: () => ({
@@ -31,6 +32,7 @@ export const Route = createFileRoute("/ujian/$ujianId")({
 });
 
 function InputNilaiUjian() {
+  const { sesi } = useAuth();
   const { ujianId } = Route.useParams();
   const ujian = ujianById(ujianId);
   const siswa = useMemo(
@@ -38,12 +40,28 @@ function InputNilaiUjian() {
     [ujian],
   );
   const [nilai, setNilai] = useState<Record<string, string>>(() => nilaiUjianAwal(ujianId));
-  const [pesan, setPesan] = useState<string | null>(null);
+
+  if (
+    !sesi ||
+    !["guru", "wali_kelas", "operator", "kepala_sekolah", "auditor"].includes(sesi.peran)
+  ) {
+    return (
+      <AppShell>
+        <PageHeader
+          judul="Akses terbatas"
+          deskripsi="Rincian nilai ujian contoh hanya untuk staf sekolah yang berwenang."
+        />
+      </AppShell>
+    );
+  }
 
   if (!ujian) {
     return (
       <AppShell>
-        <PageHeader judul="Ujian tidak ditemukan" deskripsi="Ujian yang Anda buka tidak tersedia." />
+        <PageHeader
+          judul="Ujian tidak ditemukan"
+          deskripsi="Ujian yang Anda buka tidak tersedia."
+        />
         <Button asChild variant="outline">
           <Link to="/akademik">
             <ArrowLeft className="size-4" /> Kembali ke Akademik
@@ -53,9 +71,7 @@ function InputNilaiUjian() {
     );
   }
 
-  const angka = siswa
-    .map((s) => Number(nilai[s.id]))
-    .filter((n) => Number.isFinite(n) && n > 0);
+  const angka = siswa.map((s) => Number(nilai[s.id])).filter((n) => Number.isFinite(n) && n > 0);
   const rata = angka.length ? Math.round(angka.reduce((a, b) => a + b, 0) / angka.length) : 0;
   const tertinggi = angka.length ? Math.max(...angka) : 0;
 
@@ -63,7 +79,7 @@ function InputNilaiUjian() {
     <AppShell>
       <PageHeader
         judul={`Input nilai: ${ujian.nama}`}
-        deskripsi={`${ujian.mapel} · Kelas ${namaKelas(ujian.kelasId)} · ${ujian.jenis} · ${ujian.tanggal}`}
+        deskripsi={`${ujian.mapel} · Kelas ${namaKelas(ujian.kelasId)} · ${ujian.jenis} · ${ujian.tanggal} · data contoh statis; input nilai baru ada di tab Nilai demo pada Akademik.`}
         aksi={
           <>
             <Button asChild variant="outline">
@@ -71,30 +87,36 @@ function InputNilaiUjian() {
                 <ArrowLeft className="size-4" /> Kembali
               </Link>
             </Button>
-            <Button onClick={() => setPesan(`Nilai ujian tersimpan untuk ${angka.length} siswa.`)}>
-              <Save className="size-4" /> Simpan nilai
-            </Button>
           </>
         }
       />
 
-      {pesan ? (
-        <p role="status" className="mb-4 rounded-md bg-success/12 px-3 py-2 text-sm text-success">
-          {pesan}
-        </p>
-      ) : null}
-
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Peserta" nilai={siswa.length} keterangan={`Kelas ${namaKelas(ujian.kelasId)}`} icon={Users} />
-        <StatCard label="Sudah dinilai" nilai={angka.length} keterangan="Nilai terisi" icon={ClipboardCheck} />
+        <StatCard
+          label="Peserta"
+          nilai={siswa.length}
+          keterangan={`Kelas ${namaKelas(ujian.kelasId)}`}
+          icon={Users}
+        />
+        <StatCard
+          label="Sudah dinilai"
+          nilai={angka.length}
+          keterangan="Nilai terisi"
+          icon={ClipboardCheck}
+        />
         <StatCard label="Rata-rata" nilai={rata} keterangan="Skala 0–100" icon={ClipboardCheck} />
-        <StatCard label="Nilai tertinggi" nilai={tertinggi} keterangan="Kelas ini" icon={ClipboardCheck} />
+        <StatCard
+          label="Nilai tertinggi"
+          nilai={tertinggi}
+          keterangan="Kelas ini"
+          icon={ClipboardCheck}
+        />
       </section>
 
       <div className="mt-6">
         <TabelData
           judul="Daftar siswa & nilai ujian"
-          deskripsi="Isi nilai 0–100 untuk setiap siswa, lalu tekan Simpan nilai."
+          deskripsi="Nilai di halaman ini adalah contoh statis, bukan entri yang tersimpan. Buat penilaian pada tab Nilai demo."
           data={siswa}
           kolom={[
             { judul: "NISN", render: (s) => s.nisn },
@@ -120,6 +142,7 @@ function InputNilaiUjian() {
                   type="number"
                   min={0}
                   max={100}
+                  readOnly
                   aria-label={`Nilai ujian ${s.nama}`}
                   value={nilai[s.id] ?? ""}
                   onChange={(e) => setNilai((n) => ({ ...n, [s.id]: e.target.value }))}

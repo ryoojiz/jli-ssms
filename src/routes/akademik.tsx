@@ -36,20 +36,21 @@ import {
 } from "@/lib/demo-data";
 import { useAuth } from "@/lib/auth-context";
 import { useDataCloud } from "@/lib/data-cloud";
+import { GradebookDemo } from "@/components/gradebook-demo";
 
 export const Route = createFileRoute("/akademik")({
   head: () => ({
     meta: [
-      { title: "Akademik — Jadwal, Tugas, Nilai & E-Rapor | SMS" },
+      { title: "Akademik — Jadwal, Nilai Contoh & Nilai Demo | SSMS" },
       {
         name: "description",
         content:
-          "Kelola kurikulum, jadwal pelajaran, tugas, ujian, input nilai, dan e-rapor siswa dalam satu modul akademik terpadu.",
+          "Jadwal dan nilai contoh statis, serta input dan publikasi nilai demo dalam satu browser.",
       },
       { property: "og:title", content: "Modul Akademik — SMS Sekolah" },
       {
         property: "og:description",
-        content: "Jadwal pelajaran, tugas, ujian, nilai, dan e-rapor per siswa.",
+        content: "Jadwal contoh dan alur penilaian demo per siswa.",
       },
     ],
   }),
@@ -59,12 +60,17 @@ export const Route = createFileRoute("/akademik")({
 function Akademik() {
   const { sesi } = useAuth();
   useDataCloud();
-  const waliMurid = sesi?.peran === "walimurid";
+  const pribadi = sesi?.peran === "walimurid" || sesi?.peran === "siswa";
   const [kelasId, setKelasId] = useState("K5A");
-  const jadwalKelas = JADWAL.filter((j) => j.kelasId === kelasId);
-  const siswaKelas = SISWA.filter((s) => s.kelasId === kelasId && (!waliMurid || s.id === sesi.siswaId));
-  const tugasKelas = TUGAS.filter((t) => !waliMurid || t.kelasId === kelasId);
-  const ujianKelas = UJIAN.filter((u) => !waliMurid || u.kelasId === kelasId);
+  const kelasAktif = pribadi
+    ? (SISWA.find((s) => s.id === sesi?.siswaId)?.kelasId ?? kelasId)
+    : kelasId;
+  const jadwalKelas = JADWAL.filter((j) => j.kelasId === kelasAktif);
+  const siswaKelas = SISWA.filter(
+    (s) => s.kelasId === kelasAktif && (!pribadi || s.id === sesi?.siswaId),
+  );
+  const tugasKelas = TUGAS.filter((t) => !pribadi || t.kelasId === kelasAktif);
+  const ujianKelas = UJIAN.filter((u) => !pribadi || u.kelasId === kelasAktif);
   const rataKelas = Math.round(
     siswaKelas.reduce((a, s) => a + rataRataSiswa(s.id), 0) / (siswaKelas.length || 1),
   );
@@ -72,44 +78,78 @@ function Akademik() {
   return (
     <AppShell>
       <PageHeader
-        judul={waliMurid ? "Akademik Anak" : "Akademik"}
-        deskripsi={waliMurid ? `Jadwal, tugas, ujian, dan nilai ${siswaKelas[0]?.nama ?? "anak Anda"}.` : "Kurikulum, jadwal pelajaran, tugas, ujian, penilaian, dan e-rapor."}
+        judul={pribadi ? "Akademik Pribadi" : "Akademik"}
+        deskripsi={
+          pribadi
+            ? `Jadwal dan nilai contoh ${siswaKelas[0]?.nama ?? "anak Anda"}; nilai demo terbit ada di tab Nilai demo.`
+            : "Jadwal dan nilai contoh, serta alur penilaian demo yang tersimpan di browser."
+        }
         aksi={
-          waliMurid ? undefined : <Select value={kelasId} onValueChange={setKelasId}>
-            <SelectTrigger className="w-44">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {KELAS.map((k) => (
-                <SelectItem key={k.id} value={k.id}>
-                  Kelas {k.nama} · {k.ruang}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          pribadi ? undefined : (
+            <Select value={kelasId} onValueChange={setKelasId}>
+              <SelectTrigger className="w-44">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {KELAS.map((k) => (
+                  <SelectItem key={k.id} value={k.id}>
+                    Kelas {k.nama} · {k.ruang}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )
         }
       />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label={waliMurid ? "Kelas anak" : "Rombel aktif"} nilai={waliMurid ? namaKelas(kelasId) : KELAS.length} keterangan={waliMurid ? "Tahun ajaran berjalan" : "Kelas 1 sampai 6"} icon={GraduationCap} />
-        <StatCard label="Mata pelajaran" nilai={MAPEL.length} keterangan="Kurikulum Merdeka" icon={BookMarked} />
-        <StatCard label="Tugas aktif" nilai={tugasKelas.filter((t) => t.status === "Aktif").length} keterangan="Belum lewat tenggat" icon={ClipboardList} />
-        <StatCard label={waliMurid ? "Rata-rata anak" : `Rata-rata kelas ${namaKelas(kelasId)}`} nilai={rataKelas} keterangan="Skala 0–100" icon={CalendarDays} />
+        <StatCard
+          label={pribadi ? "Kelas" : "Rombel aktif"}
+          nilai={pribadi ? namaKelas(kelasAktif) : KELAS.length}
+          keterangan={pribadi ? "Tahun ajaran berjalan" : "Kelas 1 sampai 6"}
+          icon={GraduationCap}
+        />
+        <StatCard
+          label="Mata pelajaran"
+          nilai={MAPEL.length}
+          keterangan="Kurikulum Merdeka"
+          icon={BookMarked}
+        />
+        <StatCard
+          label="Tugas aktif"
+          nilai={tugasKelas.filter((t) => t.status === "Aktif").length}
+          keterangan="Belum lewat tenggat"
+          icon={ClipboardList}
+        />
+        <StatCard
+          label={pribadi ? "Rata-rata contoh" : `Rata-rata kelas ${namaKelas(kelasAktif)}`}
+          nilai={rataKelas}
+          keterangan="Skala 0–100"
+          icon={CalendarDays}
+        />
       </section>
 
-      <Tabs defaultValue="jadwal" className="mt-6">
-        <TabsList>
+      <Tabs defaultValue="nilai-demo" className="mt-6">
+        <TabsList className="max-w-full overflow-x-auto">
+          <TabsTrigger value="nilai-demo">Nilai demo</TabsTrigger>
           <TabsTrigger value="jadwal">Jadwal</TabsTrigger>
           <TabsTrigger value="tugas">Tugas</TabsTrigger>
           <TabsTrigger value="ujian">Ujian</TabsTrigger>
-          <TabsTrigger value="nilai">Nilai & E-Rapor</TabsTrigger>
+          <TabsTrigger value="nilai">Nilai contoh</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="nilai-demo" className="mt-4">
+          <GradebookDemo />
+        </TabsContent>
 
         <TabsContent value="jadwal" className="mt-4">
           <Card className="overflow-x-auto p-5">
             <h2 className="text-sm font-semibold text-foreground">
-              Jadwal pelajaran kelas {namaKelas(kelasId)}
+              Jadwal pelajaran kelas {namaKelas(kelasAktif)}
             </h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Jadwal contoh untuk navigasi demo; bukan penetapan jadwal resmi.
+            </p>
             <div className="mt-4 grid min-w-[52rem] grid-cols-5 gap-3">
               {HARI.map((hari) => (
                 <div key={hari}>
@@ -146,18 +186,25 @@ function Akademik() {
               { judul: "Mapel", render: (t) => t.mapel },
               { judul: "Tenggat", render: (t) => t.tenggat },
               { judul: "Pengumpulan", kanan: true, render: (t) => `${t.dikumpulkan}/${t.total}` },
-              { judul: "Status", render: (t) => <StatusPill nada={nadaStatus(t.status)}>{t.status}</StatusPill> },
-              ...(!waliMurid ? [{
-                judul: "Aksi",
-                kanan: true,
-                render: (t: (typeof TUGAS)[number]) => (
-                  <Button asChild size="sm" variant="outline">
-                    <Link to="/tugas/$tugasId" params={{ tugasId: t.id }}>
-                      <ClipboardCheck className="size-4" /> Nilai tugas
-                    </Link>
-                  </Button>
-                ),
-              }] : []),
+              {
+                judul: "Status",
+                render: (t) => <StatusPill nada={nadaStatus(t.status)}>{t.status}</StatusPill>,
+              },
+              ...(!pribadi
+                ? [
+                    {
+                      judul: "Aksi",
+                      kanan: true,
+                      render: (t: (typeof TUGAS)[number]) => (
+                        <Button asChild size="sm" variant="outline">
+                          <Link to="/tugas/$tugasId" params={{ tugasId: t.id }}>
+                            <ClipboardCheck className="size-4" /> Nilai tugas
+                          </Link>
+                        </Button>
+                      ),
+                    },
+                  ]
+                : []),
             ]}
           />
         </TabsContent>
@@ -173,25 +220,29 @@ function Akademik() {
               { judul: "Mapel", render: (u) => u.mapel },
               { judul: "Kelas", render: (u) => namaKelas(u.kelasId) },
               { judul: "Tanggal", render: (u) => u.tanggal },
-              ...(!waliMurid ? [{
-                judul: "Aksi",
-                kanan: true,
-                render: (u: (typeof UJIAN)[number]) => (
-                  <Button asChild size="sm" variant="outline">
-                    <Link to="/ujian/$ujianId" params={{ ujianId: u.id }}>
-                      <Pencil className="size-4" /> Edit nilai
-                    </Link>
-                  </Button>
-                ),
-              }] : []),
+              ...(!pribadi
+                ? [
+                    {
+                      judul: "Aksi",
+                      kanan: true,
+                      render: (u: (typeof UJIAN)[number]) => (
+                        <Button asChild size="sm" variant="outline">
+                          <Link to="/ujian/$ujianId" params={{ ujianId: u.id }}>
+                            <Pencil className="size-4" /> Edit nilai
+                          </Link>
+                        </Button>
+                      ),
+                    },
+                  ]
+                : []),
             ]}
           />
         </TabsContent>
 
         <TabsContent value="nilai" className="mt-4">
           <TabelData
-            judul={`E-Rapor kelas ${namaKelas(kelasId)}`}
-            deskripsi="Nilai rata-rata per mata pelajaran inti."
+            judul={`Nilai contoh kelas ${namaKelas(kelasAktif)}`}
+            deskripsi="Data statis contoh; bukan e-Rapor resmi dan tidak digabung dengan nilai demo baru."
             data={siswaKelas}
             kolom={[
               { judul: "NISN", render: (s) => s.nisn },
@@ -208,7 +259,9 @@ function Akademik() {
                 render: (s) => {
                   const r = rataRataSiswa(s.id);
                   return (
-                    <StatusPill nada={r >= 80 ? "baik" : r >= 70 ? "peringatan" : "bahaya"}>{r}</StatusPill>
+                    <StatusPill nada={r >= 80 ? "baik" : r >= 70 ? "peringatan" : "bahaya"}>
+                      {r}
+                    </StatusPill>
                   );
                 },
               },

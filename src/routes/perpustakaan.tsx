@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BUKU, SIRKULASI } from "@/lib/demo-data";
 import { SISWA } from "@/lib/demo-data";
 import { useAuth } from "@/lib/auth-context";
+import { LibraryBookingDemo } from "@/components/library-booking-demo";
 
 export const Route = createFileRoute("/perpustakaan")({
   head: () => ({
@@ -40,21 +41,54 @@ function Perpustakaan() {
     <AppShell>
       <PageHeader
         judul={waliMurid ? "Perpustakaan Anak" : "Perpustakaan"}
-        deskripsi={waliMurid ? `Katalog dan riwayat peminjaman ${anak?.nama ?? "anak Anda"}.` : "Katalog koleksi, sirkulasi berbasis RFID/QR, dan pengelolaan keterlambatan."}
+        deskripsi={
+          waliMurid
+            ? `Katalog dan riwayat peminjaman contoh ${anak?.nama ?? "anak Anda"}.`
+            : "Katalog dan sirkulasi contoh; booking ruang adalah alur demo satu browser."
+        }
       />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Judul koleksi" nilai={BUKU.length} keterangan="Terkatalog dengan ISBN" icon={Library} />
-        <StatCard label="Total eksemplar" nilai={stok} keterangan={`${tersedia} tersedia di rak`} icon={BookCopy} />
-        <StatCard label={waliMurid ? "Dipinjam anak" : "Sedang dipinjam"} nilai={waliMurid ? sirkulasi.filter((s) => s.status !== "Dikembalikan").length : stok - tersedia} keterangan="Sirkulasi aktif" icon={BookOpen} />
-        <StatCard label="Terlambat" nilai={sirkulasi.filter((s) => s.status === "Terlambat").length} keterangan="Pengingat dikirim ke wali" icon={AlarmClock} />
+        <StatCard
+          label="Judul koleksi"
+          nilai={BUKU.length}
+          keterangan="Terkatalog dengan ISBN"
+          icon={Library}
+        />
+        <StatCard
+          label="Total eksemplar"
+          nilai={stok}
+          keterangan={`${tersedia} tersedia di rak`}
+          icon={BookCopy}
+        />
+        <StatCard
+          label={waliMurid ? "Dipinjam anak" : "Sedang dipinjam"}
+          nilai={
+            waliMurid
+              ? sirkulasi.filter((s) => s.status !== "Dikembalikan").length
+              : stok - tersedia
+          }
+          keterangan="Sirkulasi aktif"
+          icon={BookOpen}
+        />
+        <StatCard
+          label="Terlambat · contoh"
+          nilai={sirkulasi.filter((s) => s.status === "Terlambat").length}
+          keterangan="Belum ada pengingat otomatis"
+          icon={AlarmClock}
+        />
       </section>
 
-      <Tabs defaultValue="katalog" className="mt-6">
-        <TabsList>
+      <Tabs defaultValue="booking" className="mt-6">
+        <TabsList className="max-w-full overflow-x-auto">
+          <TabsTrigger value="booking">Booking ruang</TabsTrigger>
           <TabsTrigger value="katalog">Katalog</TabsTrigger>
           <TabsTrigger value="sirkulasi">Sirkulasi</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="booking" className="mt-4">
+          <LibraryBookingDemo />
+        </TabsContent>
 
         <TabsContent value="katalog" className="mt-4">
           <TabelData
@@ -74,7 +108,7 @@ function Perpustakaan() {
         <TabsContent value="sirkulasi" className="mt-4">
           <TabelData
             judul="Sirkulasi peminjaman"
-            deskripsi="Batas pinjam 7 hari, perpanjangan maksimal 1 kali."
+            deskripsi="Data sirkulasi contoh statis; belum terhubung ke peminjaman atau pengingat otomatis."
             data={sirkulasi}
             kolom={[
               { judul: "ID", render: (s) => s.id },
@@ -82,7 +116,10 @@ function Perpustakaan() {
               { judul: "Peminjam", render: (s) => `${s.peminjam} (${s.kelas})` },
               { judul: "Tgl pinjam", render: (s) => s.pinjam },
               { judul: "Jatuh tempo", render: (s) => s.jatuhTempo },
-              { judul: "Status", render: (s) => <StatusPill nada={nadaStatus(s.status)}>{s.status}</StatusPill> },
+              {
+                judul: "Status",
+                render: (s) => <StatusPill nada={nadaStatus(s.status)}>{s.status}</StatusPill>,
+              },
             ]}
           />
         </TabsContent>

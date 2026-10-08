@@ -12,13 +12,13 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { toast } from "sonner";
 
 import { AppShell, PageHeader, StatusPill, nadaStatus } from "@/components/app-shell";
 import { TabelData } from "@/components/data-table";
 import { StatCard } from "@/components/stat-card";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { TeacherKpiDemo } from "@/components/teacher-kpi-demo";
 import {
   Select,
   SelectContent,
@@ -71,7 +71,7 @@ function Analitik() {
     <AppShell>
       <PageHeader
         judul="Dashboard & Analytics"
-        deskripsi="Single pane of glass lintas modul: katalog KPI berversi, drill-down, kualitas data, dan laporan terjadwal."
+        deskripsi="KPI administrasi penilaian guru dari transaksi demo; grafik dan katalog KPI lainnya adalah data contoh statis."
         aksi={
           <>
             <Select value={cakupan} onValueChange={setCakupan}>
@@ -98,25 +98,40 @@ function Analitik() {
                 ))}
               </SelectContent>
             </Select>
-            <Button
-              variant="outline"
-              onClick={() =>
-                toast.success("Ekspor disiapkan", {
-                  description: `Filter aktif: ${cakupan} · ${periode} (XLSX).`,
-                })
-              }
-            >
-              <Download className="size-4" /> Ekspor
+            <Button variant="outline" disabled title="Ekspor belum terhubung pada demo">
+              <Download className="size-4" /> Ekspor belum tersedia
             </Button>
           </>
         }
       />
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="KPI dipantau" nilai={KPI_KATALOG.length} keterangan="Definisi berversi & ber-owner" icon={Gauge} />
-        <StatCard label="KPI di luar target" nilai={peringatan} keterangan="Memicu threshold alert" icon={AlertTriangle} />
-        <StatCard label="Event ter-ingest" nilai={totalEvent.toLocaleString("id-ID")} keterangan="24 jam terakhir" icon={Database} />
-        <StatCard label="Temuan kualitas data" nilai={dqTemuan} keterangan="Missing, duplikat, outlier" icon={ShieldCheck} />
+      <TeacherKpiDemo />
+
+      <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          label="KPI contoh statis"
+          nilai={KPI_KATALOG.length}
+          keterangan="Bukan hitungan dari transaksi baru"
+          icon={Gauge}
+        />
+        <StatCard
+          label="Di luar target · contoh"
+          nilai={peringatan}
+          keterangan="Tidak memicu notifikasi nyata"
+          icon={AlertTriangle}
+        />
+        <StatCard
+          label="Event contoh"
+          nilai={totalEvent.toLocaleString("id-ID")}
+          keterangan="Data simulasi, bukan 24 jam terakhir"
+          icon={Database}
+        />
+        <StatCard
+          label="Temuan kualitas · contoh"
+          nilai={dqTemuan}
+          keterangan="Data simulasi"
+          icon={ShieldCheck}
+        />
       </section>
 
       <section className="mt-6 grid gap-4 lg:grid-cols-2">
@@ -132,8 +147,20 @@ function Analitik() {
                 <XAxis dataKey="periode" tick={{ fontSize: 12 }} />
                 <YAxis domain={[70, 100]} tick={{ fontSize: 12 }} />
                 <Tooltip />
-                <Line type="monotone" dataKey="kehadiran" name="Kehadiran (%)" stroke="var(--color-primary)" strokeWidth={2} />
-                <Line type="monotone" dataKey="nilai" name="Rata-rata nilai" stroke="var(--color-info)" strokeWidth={2} />
+                <Line
+                  type="monotone"
+                  dataKey="kehadiran"
+                  name="Kehadiran (%)"
+                  stroke="var(--color-primary)"
+                  strokeWidth={2}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="nilai"
+                  name="Rata-rata nilai"
+                  stroke="var(--color-info)"
+                  strokeWidth={2}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -148,11 +175,28 @@ function Analitik() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={PERBANDINGAN_SEKOLAH}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                <XAxis dataKey="sekolah" tick={{ fontSize: 10 }} interval={0} height={50} angle={-12} textAnchor="end" />
+                <XAxis
+                  dataKey="sekolah"
+                  tick={{ fontSize: 10 }}
+                  interval={0}
+                  height={50}
+                  angle={-12}
+                  textAnchor="end"
+                />
                 <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
                 <Tooltip />
-                <Bar dataKey="kehadiran" name="Kehadiran (%)" fill="var(--color-primary)" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="serapan" name="Serapan anggaran (%)" fill="var(--color-info)" radius={[4, 4, 0, 0]} />
+                <Bar
+                  dataKey="kehadiran"
+                  name="Kehadiran (%)"
+                  fill="var(--color-primary)"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar
+                  dataKey="serapan"
+                  name="Serapan anggaran (%)"
+                  fill="var(--color-info)"
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -162,15 +206,16 @@ function Analitik() {
       <div className="mt-6">
         <TabelData
           judul="Katalog KPI"
-          deskripsi="Setiap KPI memiliki formula, sumber, owner, frekuensi refresh, dan versi (BR-01, BR-05)."
+          deskripsi="Katalog dan nilai statis contoh; terpisah dari KPI guru demo di atas."
           data={KPI_KATALOG}
           aksi={
             <Button
               variant="outline"
               size="sm"
-              onClick={() => toast.success("Perhitungan ulang KPI dijalankan", { description: "Status refresh dicatat pada log audit." })}
+              disabled
+              title="Katalog contoh tidak dapat dihitung ulang"
             >
-              <RefreshCw className="size-4" /> Refresh KPI
+              <RefreshCw className="size-4" /> Refresh belum tersedia
             </Button>
           }
           kolom={[
@@ -188,10 +233,17 @@ function Analitik() {
             { judul: "Owner", render: (k) => k.owner },
             { judul: "Frekuensi", render: (k) => k.frekuensi },
             { judul: "Versi", render: (k) => k.versi },
-            { judul: "Nilai", kanan: true, render: (k) => <span className="font-semibold">{k.nilai}</span> },
+            {
+              judul: "Nilai",
+              kanan: true,
+              render: (k) => <span className="font-semibold">{k.nilai}</span>,
+            },
             { judul: "Target", kanan: true, render: (k) => k.target },
             { judul: "Refresh", render: (k) => k.refresh },
-            { judul: "Status", render: (k) => <StatusPill nada={nadaStatus(k.status)}>{k.status}</StatusPill> },
+            {
+              judul: "Status",
+              render: (k) => <StatusPill nada={nadaStatus(k.status)}>{k.status}</StatusPill>,
+            },
           ]}
         />
       </div>
@@ -205,7 +257,10 @@ function Analitik() {
             { judul: "Sumber", render: (d) => <span className="font-medium">{d.sumber}</span> },
             { judul: "Pemeriksaan", render: (d) => d.pemeriksaan },
             { judul: "Temuan", kanan: true, render: (d) => `${d.temuan} / amb. ${d.ambang}` },
-            { judul: "Status", render: (d) => <StatusPill nada={nadaStatus(d.status)}>{d.status}</StatusPill> },
+            {
+              judul: "Status",
+              render: (d) => <StatusPill nada={nadaStatus(d.status)}>{d.status}</StatusPill>,
+            },
           ]}
         />
 
@@ -218,7 +273,10 @@ function Analitik() {
             { judul: "Metode", render: (i) => i.metode },
             { judul: "Event 24 jam", kanan: true, render: (i) => i.event.toLocaleString("id-ID") },
             { judul: "Jeda", render: (i) => i.jeda },
-            { judul: "Status", render: (i) => <StatusPill nada={nadaStatus(i.status)}>{i.status}</StatusPill> },
+            {
+              judul: "Status",
+              render: (i) => <StatusPill nada={nadaStatus(i.status)}>{i.status}</StatusPill>,
+            },
           ]}
         />
       </div>
@@ -235,7 +293,10 @@ function Analitik() {
             { judul: "Jadwal", render: (r) => r.jadwal },
             { judul: "Penerima", render: (r) => r.penerima },
             { judul: "Terakhir dikirim", render: (r) => r.terakhir },
-            { judul: "Status", render: (r) => <StatusPill nada={nadaStatus(r.status)}>{r.status}</StatusPill> },
+            {
+              judul: "Status",
+              render: (r) => <StatusPill nada={nadaStatus(r.status)}>{r.status}</StatusPill>,
+            },
           ]}
         />
       </div>

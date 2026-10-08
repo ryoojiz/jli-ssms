@@ -28,6 +28,7 @@ import { IntegrasiSistem } from "@/components/integrasi-sistem";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/lib/auth-context";
+import { announcementVisible, todayLocal, useDemoWorkflow, type AnnouncementTarget } from "@/lib/demo-workflow";
 import {
   ANGGARAN,
   DISTRIBUSI_NILAI,
@@ -78,12 +79,12 @@ function CommandCenter() {
     <AppShell>
       <PageHeader
         judul="School Command Center"
-        deskripsi="Ringkasan operasional sekolah hari ini — Kamis, 4 September 2026 (Asia/Jakarta)."
+        deskripsi="Ringkasan operasional dari data contoh 4 September 2026 (Asia/Jakarta), bukan pemantauan langsung."
       />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Kehadiran hari ini"
+          label="Kehadiran contoh · 4 Sep 2026"
           nilai={r.persenHadir}
           satuan="%"
           keterangan={`${rekap[0]!.jumlah} hadir · ${rekap[1]!.jumlah} terlambat · ${rekap[4]!.jumlah} alfa`}
@@ -265,7 +266,7 @@ function CommandCenter() {
         </Card>
 
         <Card className="p-5">
-          <h2 className="text-sm font-semibold text-foreground">Notifikasi terkirim hari ini</h2>
+          <h2 className="text-sm font-semibold text-foreground">Contoh riwayat notifikasi · tidak dikirim demo</h2>
           <ul className="mt-4 space-y-3">
             {NOTIFIKASI.map((n) => (
               <li key={n.id} className="rounded-md border border-border p-3">
@@ -309,9 +310,17 @@ function CommandCenter() {
 
 function BerandaWaliMurid() {
   const { sesi } = useAuth();
-  const anak = SISWA.find((s) => s.id === sesi?.siswaId) ?? SISWA.find((s) => s.kelasId === "K5A");
-  if (!anak) return null;
-  const presensi = PRESENSI_HARI_INI.find((p) => p.siswaId === anak.id);
+  const workflow = useDemoWorkflow();
+  const anak = SISWA.find((s) => s.id === sesi?.siswaId);
+  if (!anak) return <AppShell><PageHeader judul="Beranda Anak" deskripsi="Akun demo ini belum terhubung ke data anak." /></AppShell>;
+  const tanggal = todayLocal();
+  const perubahan = workflow.attendance.find((item) => item.siswaId === anak.id && item.date === tanggal);
+  const presensi = perubahan
+    ? { status: perubahan.status, jam: "-" }
+    : PRESENSI_HARI_INI.find((p) => p.siswaId === anak.id && p.tanggal === tanggal);
+  const belumDibaca = workflow.notifications.filter((item) => item.siswaId === anak.id && !workflow.readIds.includes(item.id)).length;
+  const demoAnnouncements = workflow.announcements.map((item) => ({ id: item.id, judul: item.title, isi: item.body, target: item.target }));
+  const pengumuman = [...demoAnnouncements, ...PENGUMUMAN].filter((item) => sesi && announcementVisible(item.target as AnnouncementTarget, sesi));
   const nilai = NILAI.filter((n) => n.siswaId === anak.id);
   const rataRata = nilai.length
     ? Math.round(nilai.reduce((jumlah, item) => jumlah + item.nilai, 0) / nilai.length)
@@ -327,7 +336,7 @@ function BerandaWaliMurid() {
       />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Kehadiran hari ini" nilai={presensi?.status ?? "Belum tercatat"} keterangan={presensi?.jam !== "-" ? `Tercatat pukul ${presensi?.jam}` : "Tidak ada waktu masuk"} icon={CalendarCheck} />
+        <StatCard label={`Kehadiran ${tanggal}`} nilai={presensi?.status ?? "Belum tercatat"} keterangan={presensi?.jam && presensi.jam !== "-" ? `Tercatat pukul ${presensi.jam}` : "Lihat catatan dan pengajuan di Kehadiran"} icon={CalendarCheck} />
         <StatCard label="Rata-rata nilai" nilai={rataRata} keterangan={`${nilai.length} mata pelajaran tercatat`} icon={GraduationCap} />
         <StatCard label="Tugas aktif" nilai={tugas.length} keterangan="Untuk kelas anak Anda" icon={ClipboardList} />
         <StatCard label="Buku dipinjam" nilai={pinjaman.length} keterangan="Peminjaman milik anak Anda" icon={BookOpen} />
@@ -348,9 +357,9 @@ function BerandaWaliMurid() {
         </Card>
 
         <Card className="p-5">
-          <h2 className="text-sm font-semibold text-foreground">Informasi sekolah</h2>
+          <h2 className="text-sm font-semibold text-foreground">Informasi sekolah · {belumDibaca} pembaruan belum dibaca</h2>
           <ul className="mt-4 space-y-3">
-            {PENGUMUMAN.filter((p) => ["Semua", "Orang Tua", "Kelas 4-6"].includes(p.target)).map((p) => (
+            {pengumuman.slice(0, 3).map((p) => (
               <li key={p.id} className="rounded-md border border-border p-3">
                 <p className="text-sm font-medium text-foreground">{p.judul}</p>
                 <p className="mt-1 text-xs text-muted-foreground">{p.isi}</p>

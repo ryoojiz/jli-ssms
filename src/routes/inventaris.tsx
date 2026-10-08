@@ -6,6 +6,7 @@ import { TabelData } from "@/components/data-table";
 import { StatCard } from "@/components/stat-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ASET, MAINTENANCE, PEMINJAMAN_ASET, rupiah } from "@/lib/demo-data";
+import { WarehouseDemo } from "@/components/warehouse-demo";
 
 export const Route = createFileRoute("/inventaris")({
   head: () => ({
@@ -33,22 +34,47 @@ function Inventaris() {
     <AppShell>
       <PageHeader
         judul="Inventaris"
-        deskripsi="Aset berkode QR/RFID, peminjaman, stock opname, dan pemeliharaan."
+        deskripsi="Data contoh aset tetap dan alur gudang barang habis pakai (demo satu browser)."
       />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total aset tercatat" nilai={ASET.length} keterangan="Terdaftar dengan kode unik" icon={Boxes} />
-        <StatCard label="Nilai perolehan" nilai={rupiah(nilai)} keterangan="Akumulasi aset aktif" icon={QrCode} />
-        <StatCard label="Sedang dipinjam" nilai={PEMINJAMAN_ASET.filter((p) => p.status !== "Selesai").length} keterangan="1 melewati tanggal kembali" icon={PackageCheck} />
-        <StatCard label="Perlu perbaikan" nilai={ASET.filter((a) => a.status === "Perbaikan").length} keterangan="Dijadwalkan bersama vendor" icon={Wrench} />
+        <StatCard
+          label="Total aset tercatat"
+          nilai={ASET.length}
+          keterangan="Terdaftar dengan kode unik"
+          icon={Boxes}
+        />
+        <StatCard
+          label="Nilai perolehan"
+          nilai={rupiah(nilai)}
+          keterangan="Akumulasi aset aktif"
+          icon={QrCode}
+        />
+        <StatCard
+          label="Sedang dipinjam"
+          nilai={PEMINJAMAN_ASET.filter((p) => p.status !== "Selesai").length}
+          keterangan="1 melewati tanggal kembali"
+          icon={PackageCheck}
+        />
+        <StatCard
+          label="Perlu perbaikan"
+          nilai={ASET.filter((a) => a.status === "Perbaikan").length}
+          keterangan="Dijadwalkan bersama vendor"
+          icon={Wrench}
+        />
       </section>
 
-      <Tabs defaultValue="aset" className="mt-6">
-        <TabsList>
+      <Tabs defaultValue="gudang" className="mt-6">
+        <TabsList className="max-w-full overflow-x-auto">
+          <TabsTrigger value="gudang">Gudang harian</TabsTrigger>
           <TabsTrigger value="aset">Daftar aset</TabsTrigger>
           <TabsTrigger value="pinjam">Peminjaman</TabsTrigger>
           <TabsTrigger value="maintenance">Pemeliharaan</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="gudang" className="mt-4">
+          <WarehouseDemo />
+        </TabsContent>
 
         <TabsContent value="aset" className="mt-4">
           <TabelData
@@ -60,8 +86,14 @@ function Inventaris() {
               { judul: "Nama aset", render: (a) => <span className="font-medium">{a.nama}</span> },
               { judul: "Kategori", render: (a) => a.kategori },
               { judul: "Lokasi", render: (a) => a.lokasi },
-              { judul: "Kondisi", render: (a) => <StatusPill nada={nadaStatus(a.kondisi)}>{a.kondisi}</StatusPill> },
-              { judul: "Status", render: (a) => <StatusPill nada={nadaStatus(a.status)}>{a.status}</StatusPill> },
+              {
+                judul: "Kondisi",
+                render: (a) => <StatusPill nada={nadaStatus(a.kondisi)}>{a.kondisi}</StatusPill>,
+              },
+              {
+                judul: "Status",
+                render: (a) => <StatusPill nada={nadaStatus(a.status)}>{a.status}</StatusPill>,
+              },
               { judul: "Nilai", kanan: true, render: (a) => rupiah(a.nilai) },
             ]}
           />
@@ -77,7 +109,10 @@ function Inventaris() {
               { judul: "Peminjam", render: (p) => p.peminjam },
               { judul: "Tgl pinjam", render: (p) => p.tanggal },
               { judul: "Tgl kembali", render: (p) => p.kembali },
-              { judul: "Status", render: (p) => <StatusPill nada={nadaStatus(p.status)}>{p.status}</StatusPill> },
+              {
+                judul: "Status",
+                render: (p) => <StatusPill nada={nadaStatus(p.status)}>{p.status}</StatusPill>,
+              },
             ]}
           />
         </TabsContent>
@@ -92,7 +127,10 @@ function Inventaris() {
               { judul: "Jenis", render: (m) => m.jenis },
               { judul: "Jadwal", render: (m) => m.jadwal },
               { judul: "Pelaksana", render: (m) => m.teknisi },
-              { judul: "Status", render: (m) => <StatusPill nada={nadaStatus(m.status)}>{m.status}</StatusPill> },
+              {
+                judul: "Status",
+                render: (m) => <StatusPill nada={nadaStatus(m.status)}>{m.status}</StatusPill>,
+              },
             ]}
           />
         </TabsContent>

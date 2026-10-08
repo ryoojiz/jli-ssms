@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 
 import { AKUN_DEMO, bolehAkses, bolehUbah, type Modul, type Sesi } from "@/lib/rbac";
 
@@ -23,7 +31,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(KUNCI);
-      setSesi(raw ? (JSON.parse(raw) as Sesi) : null);
+      const saved = raw ? (JSON.parse(raw) as Sesi) : null;
+      const demo =
+        saved && AKUN_DEMO.find((a) => a.email === saved.email && a.peran === saved.peran);
+      if (demo) {
+        const { kataSandi: _abaikan, ...profil } = demo;
+        setSesi(profil);
+      } else setSesi(saved);
     } catch {
       setSesi(null);
     }
