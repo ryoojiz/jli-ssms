@@ -63,9 +63,8 @@ function Komunikasi() {
     target: item.target,
     tanggal: formatDemoDateTime(item.publishedAt),
     pengirim: item.author,
-    demo: true,
   }));
-  const daftar = [...demoAnnouncements, ...PENGUMUMAN.map((item) => ({ ...item, demo: false }))];
+  const daftar = [...demoAnnouncements, ...PENGUMUMAN];
   const pengumumanTerlihat = sesi
     ? daftar.filter((item) => announcementVisible(item.target as AnnouncementTarget, sesi))
     : [];
@@ -80,7 +79,7 @@ function Komunikasi() {
       publishAnnouncement(sesi, judul, isi, target);
       setJudul("");
       setIsi("");
-      toast.success("Pengumuman demo tersimpan di browser ini.");
+      toast.success("Pengumuman tersimpan.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Pengumuman gagal disimpan.");
     }
@@ -92,8 +91,8 @@ function Komunikasi() {
         judul={waliMurid ? "Informasi Sekolah" : "Komunikasi"}
         deskripsi={
           waliMurid
-            ? "Pengumuman dan pembaruan kehadiran untuk anak Anda di browser demo ini."
-            : "Pengumuman sekolah dan contoh riwayat notifikasi. WhatsApp, email, dan push belum terhubung."
+            ? "Pengumuman dan pembaruan kehadiran untuk anak Anda."
+            : "Pengumuman sekolah dan pembaruan untuk wali murid. WhatsApp, email, dan push belum tersedia."
         }
       />
 
@@ -101,13 +100,13 @@ function Komunikasi() {
         <StatCard
           label="Pengumuman terlihat"
           nilai={pengumumanTerlihat.length}
-          keterangan="Termasuk data contoh dan demo browser"
+          keterangan="Sesuai target penerima"
           icon={Megaphone}
         />
         <StatCard
-          label={waliMurid ? "Pembaruan belum dibaca" : "Pembaruan demo di browser"}
+          label={waliMurid ? "Pembaruan belum dibaca" : "Pembaruan kehadiran"}
           nilai={waliMurid ? belumDibaca : workflow.notifications.length}
-          keterangan="Hanya dalam aplikasi demo ini"
+          keterangan="Notifikasi dalam aplikasi"
           icon={BellRing}
         />
       </section>
@@ -162,7 +161,7 @@ function Komunikasi() {
                   id="judul"
                   value={judul}
                   onChange={(e) => setJudul(e.target.value)}
-                  placeholder="Contoh: Libur Maulid Nabi"
+                  placeholder="Mis. Libur Maulid Nabi"
                 />
               </div>
               <div className="space-y-1.5">
@@ -194,7 +193,7 @@ function Komunikasi() {
                 />
               </div>
               <Button className="w-full" onClick={kirim}>
-                Simpan pengumuman demo
+                Simpan pengumuman
               </Button>
             </div>
           </Card>
@@ -211,7 +210,7 @@ function Komunikasi() {
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">{p.isi}</p>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  {p.pengirim} · {p.tanggal} · {p.demo ? "Demo browser" : "Data contoh"}
+                  {p.pengirim} · {p.tanggal}
                 </p>
               </li>
             ))}
@@ -227,8 +226,8 @@ function Komunikasi() {
       {!waliMurid ? (
         <div className="mt-6">
           <TabelData
-            judul="Contoh riwayat notifikasi eksternal"
-            deskripsi="Data statis untuk ilustrasi. WhatsApp, email, dan push tidak dikirim oleh demo ini."
+            judul="Pratinjau kanal notifikasi eksternal"
+            deskripsi="Pengiriman WhatsApp, email, dan push belum tersedia."
             data={NOTIFIKASI}
             kolom={[
               { judul: "ID", render: (n) => n.id },

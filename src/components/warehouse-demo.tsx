@@ -51,10 +51,10 @@ export function WarehouseDemo() {
   return (
     <div className="space-y-5">
       <Card className="p-5">
-        <h2 className="font-semibold">Gudang barang habis pakai · demo satu browser</h2>
+        <h2 className="font-semibold">Gudang barang habis pakai</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Terpisah dari aset bernomor unik. Saldo berasal dari barang masuk, penyerahan, dan opname
-          yang disetujui. Data Cloud tidak diubah.
+          yang disetujui.
         </p>
         {sesi.peran === "operator" && (
           <div className="mt-4 grid gap-3 md:grid-cols-4">

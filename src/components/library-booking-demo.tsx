@@ -47,7 +47,7 @@ export function LibraryBookingDemo() {
   return (
     <div className="space-y-5">
       <Card className="p-5">
-        <h2 className="font-semibold">Booking Ruang Perpustakaan · demo</h2>
+        <h2 className="font-semibold">Booking Ruang Perpustakaan</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Satu ruang untuk kunjungan kelas/kelompok. Slot menunggu konfirmasi pustakawan; kunjungan
           aktual dicatat setelah kegiatan. Tidak ada pesan otomatis ke luar aplikasi.

@@ -19,6 +19,7 @@ import { StatCard } from "@/components/stat-card";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TeacherKpiDemo } from "@/components/teacher-kpi-demo";
+import { PriorityUsageDashboard } from "@/components/priority-usage-dashboard";
 import {
   Select,
   SelectContent,
@@ -71,7 +72,7 @@ function Analitik() {
     <AppShell>
       <PageHeader
         judul="Dashboard & Analytics"
-        deskripsi="KPI administrasi penilaian guru dari transaksi demo; grafik dan katalog KPI lainnya adalah data contoh statis."
+        deskripsi="Laporan penggunaan modul prioritas, KPI administrasi guru, dan analisis operasional sekolah."
         aksi={
           <>
             <Select value={cakupan} onValueChange={setCakupan}>
@@ -98,38 +99,39 @@ function Analitik() {
                 ))}
               </SelectContent>
             </Select>
-            <Button variant="outline" disabled title="Ekspor belum terhubung pada demo">
+            <Button variant="outline" disabled title="Ekspor belum tersedia">
               <Download className="size-4" /> Ekspor belum tersedia
             </Button>
           </>
         }
       />
 
+      <PriorityUsageDashboard />
       <TeacherKpiDemo />
 
       <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="KPI contoh statis"
+          label="Indikator strategis"
           nilai={KPI_KATALOG.length}
-          keterangan="Bukan hitungan dari transaksi baru"
+          keterangan="Katalog indikator sekolah"
           icon={Gauge}
         />
         <StatCard
-          label="Di luar target · contoh"
+          label="Di luar target"
           nilai={peringatan}
-          keterangan="Tidak memicu notifikasi nyata"
+          keterangan="Perlu perhatian"
           icon={AlertTriangle}
         />
         <StatCard
-          label="Event contoh"
+          label="Event integrasi"
           nilai={totalEvent.toLocaleString("id-ID")}
-          keterangan="Data simulasi, bukan 24 jam terakhir"
+          keterangan="Agregat sumber data"
           icon={Database}
         />
         <StatCard
-          label="Temuan kualitas · contoh"
+          label="Temuan kualitas data"
           nilai={dqTemuan}
-          keterangan="Data simulasi"
+          keterangan="Perlu ditinjau"
           icon={ShieldCheck}
         />
       </section>
@@ -206,14 +208,14 @@ function Analitik() {
       <div className="mt-6">
         <TabelData
           judul="Katalog KPI"
-          deskripsi="Katalog dan nilai statis contoh; terpisah dari KPI guru demo di atas."
+          deskripsi="Daftar indikator sekolah dan status capaian."
           data={KPI_KATALOG}
           aksi={
             <Button
               variant="outline"
               size="sm"
               disabled
-              title="Katalog contoh tidak dapat dihitung ulang"
+              title="Pembaruan katalog belum tersedia"
             >
               <RefreshCw className="size-4" /> Refresh belum tersedia
             </Button>

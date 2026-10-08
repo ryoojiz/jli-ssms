@@ -130,7 +130,7 @@ function HalamanAuth() {
 
           <h2 className="text-2xl font-bold text-foreground">Masuk ke akun sekolah</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Gunakan email dinas Anda. Autentikasi asli akan aktif setelah backend Cloud tersambung.
+            Pilih peran yang tersedia atau masukkan email dan kata sandi Anda.
           </p>
 
           <form onSubmit={kirim} className="mt-6 space-y-4">
@@ -175,7 +175,7 @@ function HalamanAuth() {
               Coba sebagai peran lain
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Kata sandi semua akun demo: <code className="font-semibold">demo1234</code>
+              Pilih peran untuk mengisi akun secara otomatis.
             </p>
             <div className="mt-3 grid max-h-60 gap-1 overflow-y-auto">
               {AKUN_DEMO.map((a) => (

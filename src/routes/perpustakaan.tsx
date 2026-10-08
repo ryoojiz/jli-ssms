@@ -43,8 +43,8 @@ function Perpustakaan() {
         judul={waliMurid ? "Perpustakaan Anak" : "Perpustakaan"}
         deskripsi={
           waliMurid
-            ? `Katalog dan riwayat peminjaman contoh ${anak?.nama ?? "anak Anda"}.`
-            : "Katalog dan sirkulasi contoh; booking ruang adalah alur demo satu browser."
+            ? `Katalog dan riwayat peminjaman ${anak?.nama ?? "anak Anda"}.`
+            : "Katalog, sirkulasi, dan booking ruang perpustakaan."
         }
       />
 
@@ -72,7 +72,7 @@ function Perpustakaan() {
           icon={BookOpen}
         />
         <StatCard
-          label="Terlambat · contoh"
+          label="Terlambat"
           nilai={sirkulasi.filter((s) => s.status === "Terlambat").length}
           keterangan="Belum ada pengingat otomatis"
           icon={AlarmClock}
@@ -108,7 +108,7 @@ function Perpustakaan() {
         <TabsContent value="sirkulasi" className="mt-4">
           <TabelData
             judul="Sirkulasi peminjaman"
-            deskripsi="Data sirkulasi contoh statis; belum terhubung ke peminjaman atau pengingat otomatis."
+            deskripsi="Riwayat peminjaman buku. Pengingat otomatis belum tersedia."
             data={sirkulasi}
             kolom={[
               { judul: "ID", render: (s) => s.id },

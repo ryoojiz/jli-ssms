@@ -24,7 +24,7 @@ export function IntegrasiSistem() {
             <Link2 className="size-5 text-primary" aria-hidden /> Integrasi Sistem Pemprov DKI & Kemendikdasmen
           </h2>
           <p className="text-sm text-muted-foreground">
-            Ringkasan dari 9 sistem sumber. Klik kartu untuk detail. (Data contoh)
+            Ringkasan dari 9 sistem sumber. Klik kartu untuk detail.
           </p>
         </div>
       </div>

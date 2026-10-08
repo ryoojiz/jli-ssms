@@ -46,17 +46,17 @@ import {
 export const Route = createFileRoute("/kehadiran")({
   head: () => ({
     meta: [
-      { title: "Kehadiran — Catatan & Izin Demo | SSMS" },
+      { title: "Kehadiran — Catatan dan Izin | SSMS" },
       {
         name: "description",
         content:
-          "Demo pencatatan kehadiran, pengajuan izin/sakit, peninjauan wali kelas, dan pembaruan dalam aplikasi untuk wali murid.",
+          "Pencatatan kehadiran, pengajuan izin/sakit, peninjauan wali kelas, dan pembaruan untuk wali murid.",
       },
       { property: "og:title", content: "Modul Kehadiran — SMS Sekolah" },
       {
         property: "og:description",
         content:
-          "Pencatatan manual demo, izin, rekap kelas, dan pembaruan dalam aplikasi untuk wali murid.",
+          "Pencatatan manual, izin, rekap kelas, dan pembaruan untuk wali murid.",
       },
     ],
   }),
@@ -99,7 +99,7 @@ function Kehadiran() {
     try {
       createLeaveRequest(sesi, jenis, tanggalIzin, alasan);
       setAlasan("");
-      toast.success("Pengajuan demo tersimpan di browser ini.");
+      toast.success("Pengajuan tersimpan.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Pengajuan gagal.");
     }
@@ -119,7 +119,7 @@ function Kehadiran() {
     if (!sesi) return;
     try {
       recordAttendance(sesi, siswaId, tanggal, status);
-      toast.success("Kehadiran demo diperbarui.");
+      toast.success("Kehadiran diperbarui.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Pencatatan gagal.");
     }
@@ -139,8 +139,8 @@ function Kehadiran() {
         judul={waliMurid ? "Kehadiran Anak" : "Kehadiran"}
         deskripsi={
           waliMurid
-            ? `Catatan kehadiran ${siswaAnak?.nama ?? "anak Anda"} dan pengajuan izin. Demo tersimpan hanya di browser ini.`
-            : "Pencatatan manual, peninjauan izin, dan rekap demo. Data perangkat pada tanggal contoh bersifat statis."
+            ? `Catatan kehadiran ${siswaAnak?.nama ?? "anak Anda"} dan pengajuan izin.`
+            : "Pencatatan manual, peninjauan izin, dan rekap kehadiran."
         }
         aksi={
           waliMurid || kelasWali ? undefined : (
@@ -172,12 +172,9 @@ function Kehadiran() {
           />
         </div>
         <Button variant="outline" onClick={() => setTanggal("2026-09-04")}>
-          Lihat data contoh 4 Sep 2026
+          Lihat 4 Sep 2026
         </Button>
-        <p className="text-xs text-muted-foreground">
-          Perubahan demo tidak mengubah data impor Cloud dan tidak terkirim ke perangkat atau wali
-          murid lain.
-        </p>
+        <p className="text-xs text-muted-foreground">Pilih tanggal untuk melihat atau mencatat kehadiran.</p>
       </Card>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -211,7 +208,7 @@ function Kehadiran() {
         <section className="mt-6 grid gap-4 lg:grid-cols-2">
           <Card className="p-5">
             <h2 className="text-sm font-semibold text-foreground">
-              Contoh kehadiran per rombel · 4 Sep 2026
+              Kehadiran per rombel · 4 Sep 2026
             </h2>
             <div className="mt-4 h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -243,7 +240,7 @@ function Kehadiran() {
 
           <Card className="p-5">
             <h2 className="text-sm font-semibold text-foreground">
-              Contoh tren mingguan · data sintetis
+              Tren mingguan
             </h2>
             <div className="mt-4 h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -284,7 +281,7 @@ function Kehadiran() {
         <TabsContent value="presensi" className="mt-4">
           <TabelData
             judul={`Presensi kelas ${namaKelas(kelasAktif)} — ${tanggal}`}
-            deskripsi="Data contoh 4 Sep 2026 hanya ilustrasi. Perubahan manual disimpan di browser ini; siswa tanpa catatan tidak dianggap alfa."
+            deskripsi="Pilih tanggal untuk melihat catatan. Siswa tanpa catatan tidak dianggap alfa."
             data={presensiKelas}
             kolom={[
               { judul: "NISN", render: (r) => r.siswa.nisn },
@@ -294,7 +291,7 @@ function Kehadiran() {
                 judul: "Sumber",
                 render: (r) =>
                   r.presensi ? (
-                    <StatusPill>{r.change ? "Input demo" : "Data contoh"}</StatusPill>
+                    <StatusPill>{r.change ? "Input manual" : "Presensi awal"}</StatusPill>
                   ) : (
                     "—"
                   ),
@@ -362,8 +359,7 @@ function Kehadiran() {
               <div>
                 <h2 className="font-semibold">Ajukan izin atau sakit</h2>
                 <p className="text-xs text-muted-foreground">
-                  Untuk {siswaAnak?.nama ?? "anak terhubung"}. Gunakan data contoh saja; lampiran
-                  belum didukung.
+                  Untuk {siswaAnak?.nama ?? "anak terhubung"}. Lampiran belum didukung.
                 </p>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -402,11 +398,11 @@ function Kehadiran() {
                   placeholder="Tuliskan alasan singkat tanpa data medis sensitif."
                 />
               </div>
-              <Button onClick={ajukanIzin}>Kirim pengajuan demo</Button>
+              <Button onClick={ajukanIzin}>Kirim pengajuan</Button>
             </Card>
           ) : null}
           <Card className="mb-4 p-5">
-            <h2 className="font-semibold">Pengajuan baru · tersimpan di browser</h2>
+            <h2 className="font-semibold">Pengajuan terbaru</h2>
             {requests.length === 0 ? (
               <p className="mt-3 text-sm text-muted-foreground">
                 Belum ada pengajuan untuk{" "}
@@ -457,8 +453,8 @@ function Kehadiran() {
             )}
           </Card>
           <TabelData
-            judul="Contoh pengajuan historis"
-            deskripsi="Data statis untuk ilustrasi; tidak terhubung ke alur persetujuan demo."
+            judul="Riwayat pengajuan terdahulu"
+            deskripsi="Peninjauan tersedia untuk pengajuan terbaru di atas."
             data={waliMurid ? IZIN.filter((i) => i.siswa === siswaKelas[0]?.nama) : IZIN}
             kolom={[
               { judul: "ID", render: (i) => i.id },

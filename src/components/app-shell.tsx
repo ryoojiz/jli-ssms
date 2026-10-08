@@ -308,8 +308,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </main>
 
         <footer className="hidden border-t border-border px-4 py-4 text-xs text-muted-foreground sm:px-6 lg:block lg:px-8">
-          JLI@2026 · Zona Asia/Jakarta (UTC+7) · Mode demo; transaksi baru kehadiran, komunikasi,
-          gudang, booking, dan nilai tersimpan hanya di browser ini.
+          JLI@2026 · Zona Asia/Jakarta (UTC+7)
         </footer>
       </div>
 

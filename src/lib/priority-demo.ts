@@ -176,11 +176,11 @@ function current() {
   return state;
 }
 function save(next: PriorityState) {
-  if (typeof window === "undefined") fail("Penyimpanan demo hanya tersedia di browser.");
+  if (typeof window === "undefined") fail("Data belum dapat disimpan. Coba lagi.");
   try {
     window.localStorage.setItem(KEY, JSON.stringify(next));
   } catch {
-    fail("Penyimpanan demo di browser tidak tersedia.");
+    fail("Data belum dapat disimpan. Coba lagi.");
   }
   state = next;
   listeners.forEach((listener) => listener(next));
@@ -622,7 +622,7 @@ export function setGradeWeights(
   pts: number,
   pas: number,
 ) {
-  if (actor.peran !== "operator") fail("Hanya operator yang mengatur bobot demo.");
+  if (actor.peran !== "operator") fail("Hanya operator yang mengatur bobot nilai.");
   if (
     !KELAS.some((k) => k.id === classId) ||
     !MAPEL.includes(subject) ||

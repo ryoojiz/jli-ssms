@@ -58,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Placeholder autentikasi: nanti diganti supabase.auth.signInWithPassword.
       await new Promise((r) => setTimeout(r, 350));
       const akun = AKUN_DEMO.find((a) => a.email.toLowerCase() === email.trim().toLowerCase());
-      if (!akun) return { ok: false, pesan: "Email tidak terdaftar pada akun demo." };
+      if (!akun) return { ok: false, pesan: "Email tidak terdaftar." };
       if (akun.kataSandi !== kataSandi) return { ok: false, pesan: "Kata sandi salah." };
       const { kataSandi: _abaikan, ...profil } = akun;
       simpan(profil);

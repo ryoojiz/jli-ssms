@@ -34,7 +34,7 @@ function Inventaris() {
     <AppShell>
       <PageHeader
         judul="Inventaris"
-        deskripsi="Data contoh aset tetap dan alur gudang barang habis pakai (demo satu browser)."
+        deskripsi="Kelola aset tetap dan persediaan barang habis pakai dalam satu tempat."
       />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

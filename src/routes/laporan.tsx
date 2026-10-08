@@ -123,7 +123,7 @@ function LaporanAI() {
                   )}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => setTeks(CONTOH)}>
-                  Isi contoh laporan
+                  Isi draft laporan
                 </Button>
               </div>
             </form>

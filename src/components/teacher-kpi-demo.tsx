@@ -20,10 +20,10 @@ export function TeacherKpiDemo() {
   if (!sesi || !["kepala_sekolah", "operator", "auditor"].includes(sesi.peran)) return null;
   return (
     <Card className="mt-6 p-5">
-      <h2 className="font-semibold">KPI administrasi penilaian guru · demo</h2>
+      <h2 className="font-semibold">KPI administrasi penilaian guru</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Hanya transaksi penilaian baru dari browser ini. Dua indikator proses ini bukan penilaian
-        kinerja atau kepegawaian resmi; kehadiran/nilai murid tidak menjadi skor guru.
+        Dua indikator proses: kelengkapan nilai siswa dan publikasi sebelum tenggat. Kehadiran
+        maupun hasil nilai murid tidak menjadi skor guru.
       </p>
       <div className="mt-3 max-w-xs">
         <Label htmlFor="kpi-semester">Semester</Label>
@@ -50,7 +50,7 @@ export function TeacherKpiDemo() {
                 </p>
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                Sumber: penilaian demo yang dibuat guru ini pada {semester}. Tenggat yang belum
+                Sumber: penilaian yang dibuat guru ini pada {semester}. Tenggat yang belum
                 lewat tidak masuk indikator ketepatan waktu.
               </p>
               {notes.length > 0 && (

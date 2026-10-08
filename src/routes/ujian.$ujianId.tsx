@@ -14,16 +14,16 @@ import { useAuth } from "@/lib/auth-context";
 export const Route = createFileRoute("/ujian/$ujianId")({
   head: () => ({
     meta: [
-      { title: "Input Nilai Ujian — Daftar Siswa | SMS" },
+      { title: "Rincian Nilai Ujian — Daftar Siswa | SMS" },
       {
         name: "description",
         content:
-          "Halaman input nilai hasil ujian per siswa lengkap dengan rata-rata kelas, nilai tertinggi, dan jumlah siswa yang sudah dinilai.",
+          "Rincian hasil ujian per siswa, rata-rata kelas, nilai tertinggi, dan jumlah siswa yang sudah dinilai.",
       },
-      { property: "og:title", content: "Input Nilai Ujian — SMS Sekolah" },
+      { property: "og:title", content: "Rincian Nilai Ujian — SMS Sekolah" },
       {
         property: "og:description",
-        content: "Input dan perbarui nilai hasil ujian untuk setiap siswa.",
+        content: "Lihat hasil ujian untuk setiap siswa.",
       },
       { property: "og:type", content: "website" },
     ],
@@ -49,7 +49,7 @@ function InputNilaiUjian() {
       <AppShell>
         <PageHeader
           judul="Akses terbatas"
-          deskripsi="Rincian nilai ujian contoh hanya untuk staf sekolah yang berwenang."
+          deskripsi="Rincian nilai ujian hanya untuk staf sekolah yang berwenang."
         />
       </AppShell>
     );
@@ -78,8 +78,8 @@ function InputNilaiUjian() {
   return (
     <AppShell>
       <PageHeader
-        judul={`Input nilai: ${ujian.nama}`}
-        deskripsi={`${ujian.mapel} · Kelas ${namaKelas(ujian.kelasId)} · ${ujian.jenis} · ${ujian.tanggal} · data contoh statis; input nilai baru ada di tab Nilai demo pada Akademik.`}
+        judul={`Rincian nilai: ${ujian.nama}`}
+        deskripsi={`${ujian.mapel} · Kelas ${namaKelas(ujian.kelasId)} · ${ujian.jenis} · ${ujian.tanggal}. Catat nilai baru melalui tab Penilaian di Akademik.`}
         aksi={
           <>
             <Button asChild variant="outline">
@@ -116,7 +116,7 @@ function InputNilaiUjian() {
       <div className="mt-6">
         <TabelData
           judul="Daftar siswa & nilai ujian"
-          deskripsi="Nilai di halaman ini adalah contoh statis, bukan entri yang tersimpan. Buat penilaian pada tab Nilai demo."
+          deskripsi="Lihat hasil ujian siswa. Untuk mencatat nilai baru, buka tab Penilaian di Akademik."
           data={siswa}
           kolom={[
             { judul: "NISN", render: (s) => s.nisn },

@@ -103,7 +103,7 @@ function write(next: DemoWorkflow) {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     emit(next);
   } catch {
-    throw new Error("Penyimpanan demo di browser tidak tersedia.");
+    throw new Error("Data belum dapat disimpan. Coba lagi.");
   }
 }
 
@@ -301,7 +301,7 @@ export function publishAnnouncement(
   target: AnnouncementTarget,
 ) {
   if (actor.peran !== "operator")
-    throw new Error("Hanya operator yang dapat menerbitkan pengumuman demo.");
+    throw new Error("Hanya operator yang dapat menerbitkan pengumuman.");
   if (
     !title.trim() ||
     !body.trim() ||

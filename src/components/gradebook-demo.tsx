@@ -70,10 +70,10 @@ export function GradebookDemo() {
   return (
     <div className="space-y-5">
       <Card className="p-5">
-        <h2 className="font-semibold">Nilai harian, PTS, dan PAS · demo</h2>
+        <h2 className="font-semibold">Nilai harian, PTS, dan PAS</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Transaksi baru tersimpan di browser ini. Nilai contoh lama tidak dicampurkan dengan nilai
-          akhir demo. Orang tua dan siswa hanya melihat penilaian yang dipublikasikan.
+          Nilai akhir dihitung dari penilaian yang diterbitkan dan bobot yang lengkap. Orang tua
+          dan siswa hanya melihat penilaian yang dipublikasikan.
         </p>
         <div className="mt-3 flex flex-wrap gap-3">
           <div>
@@ -199,7 +199,7 @@ export function GradebookDemo() {
         <Card className="p-5">
           <h2 className="font-semibold">Buat penilaian</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Akun demo hanya dapat menilai kelas dan mapel yang diampu. Setelah dibuat, isi nilai
+            Guru hanya dapat menilai kelas dan mapel yang diampu. Setelah dibuat, isi nilai
             seluruh siswa sebelum publikasi.
           </p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -280,7 +280,7 @@ export function GradebookDemo() {
                 Harian: {s.daily === null ? "—" : s.daily.toFixed(1)} · PTS:{" "}
                 {s.pts === null ? "—" : s.pts.toFixed(1)} · PAS:{" "}
                 {s.pas === null ? "—" : s.pas.toFixed(1)} ·{" "}
-                <b>Nilai gabungan demo: {s.final ?? "belum lengkap"}</b>
+                <b>Nilai gabungan: {s.final ?? "belum lengkap"}</b>
               </p>
             );
           })()}
@@ -288,10 +288,10 @@ export function GradebookDemo() {
       )}
 
       <Card className="p-5">
-        <h2 className="font-semibold">Daftar penilaian demo</h2>
+        <h2 className="font-semibold">Daftar penilaian</h2>
         {assessments.length === 0 ? (
           <p className="mt-3 text-sm text-muted-foreground">
-            Belum ada penilaian demo yang{" "}
+            Belum ada penilaian yang{" "}
             {parent ? "dipublikasikan untuk anak ini" : "sesuai filter"}.
           </p>
         ) : (
@@ -389,7 +389,7 @@ export function GradebookDemo() {
                   {a.publishedAt && editable && (
                     <p className="mt-2 text-xs text-muted-foreground">
                       Perubahan setelah publikasi langsung terlihat oleh orang tua dan tersimpan
-                      dalam riwayat koreksi demo.
+                      dalam riwayat koreksi.
                     </p>
                   )}
                 </section>

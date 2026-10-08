@@ -105,7 +105,7 @@ function KelasDigital() {
                 required
                 value={judul}
                 onChange={(e) => setJudul(e.target.value)}
-                placeholder="Contoh: Modul PDF Bangun Ruang"
+                placeholder="Mis. Modul PDF Bangun Ruang"
               />
             </div>
             <div className="space-y-1.5">

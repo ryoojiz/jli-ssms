@@ -25,6 +25,7 @@ import {
 import { AppShell, PageHeader, StatusPill, nadaStatus } from "@/components/app-shell";
 import { StatCard } from "@/components/stat-card";
 import { IntegrasiSistem } from "@/components/integrasi-sistem";
+import { PriorityUsageDashboard } from "@/components/priority-usage-dashboard";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/lib/auth-context";
@@ -55,12 +56,12 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Pusat kendali sekolah: KPI kehadiran, akademik, keuangan, perpustakaan, kesehatan, keamanan, dan status perangkat IoT dalam satu layar.",
+          "Pusat kendali sekolah dengan laporan penggunaan modul prioritas dan ringkasan operasional.",
       },
       { property: "og:title", content: "School Command Center — SMS Sekolah" },
       {
         property: "og:description",
-        content: "Satu layar untuk memantau seluruh operasional sekolah secara real time.",
+        content: "Laporan penggunaan dan ringkasan operasional sekolah dalam satu layar.",
       },
     ],
   }),
@@ -79,12 +80,14 @@ function CommandCenter() {
     <AppShell>
       <PageHeader
         judul="School Command Center"
-        deskripsi="Ringkasan operasional dari data contoh 4 September 2026 (Asia/Jakarta), bukan pemantauan langsung."
+        deskripsi="Ringkasan operasional sekolah dan laporan penggunaan modul prioritas."
       />
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <PriorityUsageDashboard />
+
+      <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Kehadiran contoh · 4 Sep 2026"
+          label="Kehadiran · 4 Sep 2026"
           nilai={r.persenHadir}
           satuan="%"
           keterangan={`${rekap[0]!.jumlah} hadir · ${rekap[1]!.jumlah} terlambat · ${rekap[4]!.jumlah} alfa`}
@@ -266,7 +269,7 @@ function CommandCenter() {
         </Card>
 
         <Card className="p-5">
-          <h2 className="text-sm font-semibold text-foreground">Contoh riwayat notifikasi · tidak dikirim demo</h2>
+          <h2 className="text-sm font-semibold text-foreground">Pratinjau kanal notifikasi</h2>
           <ul className="mt-4 space-y-3">
             {NOTIFIKASI.map((n) => (
               <li key={n.id} className="rounded-md border border-border p-3">
@@ -312,7 +315,7 @@ function BerandaWaliMurid() {
   const { sesi } = useAuth();
   const workflow = useDemoWorkflow();
   const anak = SISWA.find((s) => s.id === sesi?.siswaId);
-  if (!anak) return <AppShell><PageHeader judul="Beranda Anak" deskripsi="Akun demo ini belum terhubung ke data anak." /></AppShell>;
+  if (!anak) return <AppShell><PageHeader judul="Beranda Anak" deskripsi="Akun ini belum terhubung ke data anak." /></AppShell>;
   const tanggal = todayLocal();
   const perubahan = workflow.attendance.find((item) => item.siswaId === anak.id && item.date === tanggal);
   const presensi = perubahan

@@ -4,8 +4,8 @@ import {
   CalendarDays,
   ClipboardCheck,
   ClipboardList,
+  Eye,
   GraduationCap,
-  Pencil,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -41,16 +41,16 @@ import { GradebookDemo } from "@/components/gradebook-demo";
 export const Route = createFileRoute("/akademik")({
   head: () => ({
     meta: [
-      { title: "Akademik — Jadwal, Nilai Contoh & Nilai Demo | SSMS" },
+      { title: "Akademik — Jadwal dan Penilaian | SSMS" },
       {
         name: "description",
         content:
-          "Jadwal dan nilai contoh statis, serta input dan publikasi nilai demo dalam satu browser.",
+          "Jadwal pelajaran, tugas, ujian, dan pengelolaan penilaian siswa.",
       },
       { property: "og:title", content: "Modul Akademik — SMS Sekolah" },
       {
         property: "og:description",
-        content: "Jadwal contoh dan alur penilaian demo per siswa.",
+        content: "Jadwal dan penilaian per siswa.",
       },
     ],
   }),
@@ -81,8 +81,8 @@ function Akademik() {
         judul={pribadi ? "Akademik Pribadi" : "Akademik"}
         deskripsi={
           pribadi
-            ? `Jadwal dan nilai contoh ${siswaKelas[0]?.nama ?? "anak Anda"}; nilai demo terbit ada di tab Nilai demo.`
-            : "Jadwal dan nilai contoh, serta alur penilaian demo yang tersimpan di browser."
+            ? `Jadwal dan hasil penilaian ${siswaKelas[0]?.nama ?? "anak Anda"}.`
+            : "Jadwal, tugas, ujian, dan pengelolaan nilai siswa."
         }
         aksi={
           pribadi ? undefined : (
@@ -122,7 +122,7 @@ function Akademik() {
           icon={ClipboardList}
         />
         <StatCard
-          label={pribadi ? "Rata-rata contoh" : `Rata-rata kelas ${namaKelas(kelasAktif)}`}
+          label={pribadi ? "Rata-rata nilai" : `Rata-rata kelas ${namaKelas(kelasAktif)}`}
           nilai={rataKelas}
           keterangan="Skala 0–100"
           icon={CalendarDays}
@@ -131,11 +131,11 @@ function Akademik() {
 
       <Tabs defaultValue="nilai-demo" className="mt-6">
         <TabsList className="max-w-full overflow-x-auto">
-          <TabsTrigger value="nilai-demo">Nilai demo</TabsTrigger>
+          <TabsTrigger value="nilai-demo">Penilaian</TabsTrigger>
           <TabsTrigger value="jadwal">Jadwal</TabsTrigger>
           <TabsTrigger value="tugas">Tugas</TabsTrigger>
           <TabsTrigger value="ujian">Ujian</TabsTrigger>
-          <TabsTrigger value="nilai">Nilai contoh</TabsTrigger>
+          <TabsTrigger value="nilai">Ringkasan nilai</TabsTrigger>
         </TabsList>
 
         <TabsContent value="nilai-demo" className="mt-4">
@@ -147,9 +147,7 @@ function Akademik() {
             <h2 className="text-sm font-semibold text-foreground">
               Jadwal pelajaran kelas {namaKelas(kelasAktif)}
             </h2>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Jadwal contoh untuk navigasi demo; bukan penetapan jadwal resmi.
-            </p>
+            <p className="mt-1 text-xs text-muted-foreground">Jadwal pelajaran per hari.</p>
             <div className="mt-4 grid min-w-[52rem] grid-cols-5 gap-3">
               {HARI.map((hari) => (
                 <div key={hari}>
@@ -178,7 +176,7 @@ function Akademik() {
         <TabsContent value="tugas" className="mt-4">
           <TabelData
             judul="Daftar tugas"
-            deskripsi="Progres pengumpulan tugas per kelas. Buka Nilai untuk melihat siswa yang belum mengumpulkan."
+            deskripsi="Progres pengumpulan tugas per kelas. Buka rincian untuk melihat siswa yang belum mengumpulkan."
             data={tugasKelas}
             kolom={[
               { judul: "Judul", render: (t) => <span className="font-medium">{t.judul}</span> },
@@ -198,7 +196,7 @@ function Akademik() {
                       render: (t: (typeof TUGAS)[number]) => (
                         <Button asChild size="sm" variant="outline">
                           <Link to="/tugas/$tugasId" params={{ tugasId: t.id }}>
-                            <ClipboardCheck className="size-4" /> Nilai tugas
+                            <ClipboardCheck className="size-4" /> Lihat rincian
                           </Link>
                         </Button>
                       ),
@@ -212,7 +210,7 @@ function Akademik() {
         <TabsContent value="ujian" className="mt-4">
           <TabelData
             judul="Jadwal ujian & penilaian"
-            deskripsi="Tekan Edit untuk membuka daftar siswa dan menginput nilai hasil ujian."
+            deskripsi="Buka rincian untuk melihat daftar siswa dan hasil ujian."
             data={ujianKelas}
             kolom={[
               { judul: "Nama", render: (u) => <span className="font-medium">{u.nama}</span> },
@@ -228,7 +226,7 @@ function Akademik() {
                       render: (u: (typeof UJIAN)[number]) => (
                         <Button asChild size="sm" variant="outline">
                           <Link to="/ujian/$ujianId" params={{ ujianId: u.id }}>
-                            <Pencil className="size-4" /> Edit nilai
+                            <Eye className="size-4" /> Lihat rincian
                           </Link>
                         </Button>
                       ),
@@ -241,8 +239,8 @@ function Akademik() {
 
         <TabsContent value="nilai" className="mt-4">
           <TabelData
-            judul={`Nilai contoh kelas ${namaKelas(kelasAktif)}`}
-            deskripsi="Data statis contoh; bukan e-Rapor resmi dan tidak digabung dengan nilai demo baru."
+            judul={`Ringkasan nilai kelas ${namaKelas(kelasAktif)}`}
+            deskripsi="Ringkasan nilai per mata pelajaran. Penilaian yang diterbitkan tersedia di tab Penilaian."
             data={siswaKelas}
             kolom={[
               { judul: "NISN", render: (s) => s.nisn },

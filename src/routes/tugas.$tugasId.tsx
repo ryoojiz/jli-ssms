@@ -18,12 +18,12 @@ export const Route = createFileRoute("/tugas/$tugasId")({
       {
         name: "description",
         content:
-          "Pantau siswa yang belum mengumpulkan tugas dan berikan nilai untuk setiap pengumpulan langsung dari satu halaman.",
+          "Pantau pengumpulan tugas dan rincian nilai siswa dalam satu halaman.",
       },
       { property: "og:title", content: "Penilaian Tugas — SMS Sekolah" },
       {
         property: "og:description",
-        content: "Daftar pengumpulan tugas per siswa beserta input penilaian.",
+        content: "Daftar pengumpulan tugas per siswa beserta rincian penilaian.",
       },
       { property: "og:type", content: "website" },
     ],
@@ -48,7 +48,7 @@ function PenilaianTugas() {
       <AppShell>
         <PageHeader
           judul="Akses terbatas"
-          deskripsi="Rincian nilai tugas contoh hanya untuk staf sekolah yang berwenang."
+          deskripsi="Rincian nilai tugas hanya untuk staf sekolah yang berwenang."
         />
       </AppShell>
     );
@@ -77,7 +77,7 @@ function PenilaianTugas() {
     <AppShell>
       <PageHeader
         judul={tugas.judul}
-        deskripsi={`${tugas.mapel} · Kelas ${namaKelas(tugas.kelasId)} · Tenggat ${tugas.tenggat} · data contoh statis; input nilai baru ada di tab Nilai demo pada Akademik.`}
+        deskripsi={`${tugas.mapel} · Kelas ${namaKelas(tugas.kelasId)} · Tenggat ${tugas.tenggat}. Catat nilai baru melalui tab Penilaian di Akademik.`}
         aksi={
           <>
             <Button asChild variant="outline">
@@ -119,7 +119,7 @@ function PenilaianTugas() {
       <div className="mt-6">
         <TabelData
           judul="Pengumpulan & penilaian"
-          deskripsi="Nilai dan status di halaman ini adalah contoh statis, bukan entri yang tersimpan. Buat penilaian pada tab Nilai demo."
+          deskripsi="Lihat pengumpulan dan nilai siswa. Untuk mencatat nilai baru, buka tab Penilaian di Akademik."
           data={baris}
           kolom={[
             {
