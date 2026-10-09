@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth-context";
-import { KELAS } from "@/lib/demo-data";
 import {
   canBookClass,
   cancelBooking,
@@ -15,11 +14,11 @@ import {
   reviewBooking,
   setRoomCapacity,
   usePriorityDemo,
-} from "@/lib/priority-demo";
+} from "@/lib/priority-store";
 
-const run = (action: () => void, message: string) => {
+const run = async (action: () => Promise<unknown>, message: string) => {
   try {
-    action();
+    await action();
     toast.success(message);
   } catch (error) {
     toast.error(error instanceof Error ? error.message : "Booking gagal.");
@@ -29,6 +28,7 @@ const run = (action: () => void, message: string) => {
 export function LibraryBookingDemo() {
   const { sesi } = useAuth();
   const state = usePriorityDemo();
+  const KELAS = state.classes ?? [];
   const [classId, setClassId] = useState("K5A");
   const [day, setDay] = useState("");
   const [start, setStart] = useState("09:00");
@@ -53,7 +53,8 @@ export function LibraryBookingDemo() {
           aktual dicatat setelah kegiatan. Tidak ada pesan otomatis ke luar aplikasi.
         </p>
         <p className="mt-2 text-sm">
-          Kapasitas saat ini: <b>{state.roomCapacity} orang</b>
+          Kapasitas saat ini:{" "}
+          <b>{state.roomCapacity > 0 ? `${state.roomCapacity} orang` : "Belum dikonfigurasi"}</b>
         </p>
         {sesi.peran === "pustakawan" && (
           <div className="mt-3 flex max-w-sm gap-2">
@@ -69,8 +70,8 @@ export function LibraryBookingDemo() {
             <Button
               variant="outline"
               onClick={() =>
-                run(() => {
-                  setRoomCapacity(sesi, Number(capacity));
+                run(async () => {
+                  await setRoomCapacity(sesi, Number(capacity));
                   setCapacity("");
                 }, "Kapasitas ruang diperbarui.")
               }
@@ -80,7 +81,7 @@ export function LibraryBookingDemo() {
           </div>
         )}
       </Card>
-      {classes.length > 0 && (
+      {classes.length > 0 && state.roomCapacity > 0 && (
         <Card className="p-5">
           <h2 className="font-semibold">Ajukan kunjungan</h2>
           <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -150,8 +151,8 @@ export function LibraryBookingDemo() {
           <Button
             className="mt-3"
             onClick={() =>
-              run(() => {
-                createBooking(
+              run(async () => {
+                await createBooking(
                   sesi,
                   classes.some((k) => k.id === classId) ? classId : classes[0]!.id,
                   day,

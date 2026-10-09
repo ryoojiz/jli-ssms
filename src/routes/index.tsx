@@ -29,16 +29,19 @@ import { PriorityUsageDashboard } from "@/components/priority-usage-dashboard";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/lib/auth-context";
-import { announcementVisible, todayLocal, useDemoWorkflow, type AnnouncementTarget } from "@/lib/demo-workflow";
+import {
+  announcementVisible,
+  todayLocal,
+  useDemoWorkflow,
+  type AnnouncementTarget,
+} from "@/lib/workflow-store";
 import {
   ANGGARAN,
   DISTRIBUSI_NILAI,
   INSIDEN,
-  NOTIFIKASI,
   PERANGKAT,
   TREN_KEHADIRAN,
   NILAI,
-  PENGUMUMAN,
   PRESENSI_HARI_INI,
   SISWA,
   SIRKULASI,
@@ -70,11 +73,18 @@ export const Route = createFileRoute("/")({
 
 function CommandCenter() {
   const { sesi } = useAuth();
+  const workflow = useDemoWorkflow();
   if (sesi?.peran === "walimurid") return <BerandaWaliMurid />;
 
   const r = ringkasan();
-  const rekap = rekapPresensi();
   const rasio = rasioGuruSiswa();
+  const latestAttendanceDate = PRESENSI_HARI_INI.reduce(
+    (latest, row) => (row.tanggal > latest ? row.tanggal : latest),
+    "",
+  );
+  const rekap = rekapPresensi(
+    PRESENSI_HARI_INI.filter((row) => row.tanggal === latestAttendanceDate),
+  );
 
   return (
     <AppShell>
@@ -87,7 +97,7 @@ function CommandCenter() {
 
       <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Kehadiran · 4 Sep 2026"
+          label={`Kehadiran · ${latestAttendanceDate || "belum ada data"}`}
           nilai={r.persenHadir}
           satuan="%"
           keterangan={`${rekap[0]!.jumlah} hadir · ${rekap[1]!.jumlah} terlambat · ${rekap[4]!.jumlah} alfa`}
@@ -117,10 +127,30 @@ function CommandCenter() {
       <IntegrasiSistem />
 
       <section className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Tugas aktif" nilai={r.tugasAktif} keterangan="Menunggu pengumpulan siswa" icon={ClipboardList} />
-        <StatCard label="Buku dipinjam" nilai={r.bukuDipinjam} keterangan="Termasuk 1 keterlambatan" icon={BookOpen} />
-        <StatCard label="Kunjungan UKS" nilai={r.kunjunganUks} keterangan="1 rujukan ke Puskesmas" icon={HeartPulse} />
-        <StatCard label="Insiden terbuka" nilai={r.insidenTerbuka} keterangan="Perlu tindak lanjut security" icon={AlertTriangle} />
+        <StatCard
+          label="Tugas aktif"
+          nilai={r.tugasAktif}
+          keterangan="Menunggu pengumpulan siswa"
+          icon={ClipboardList}
+        />
+        <StatCard
+          label="Buku dipinjam"
+          nilai={r.bukuDipinjam}
+          keterangan="Termasuk 1 keterlambatan"
+          icon={BookOpen}
+        />
+        <StatCard
+          label="Kunjungan UKS"
+          nilai={r.kunjunganUks}
+          keterangan="1 rujukan ke Puskesmas"
+          icon={HeartPulse}
+        />
+        <StatCard
+          label="Insiden terbuka"
+          nilai={r.insidenTerbuka}
+          keterangan="Perlu tindak lanjut security"
+          icon={AlertTriangle}
+        />
       </section>
 
       <section className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -163,7 +193,10 @@ function CommandCenter() {
               <span className="font-semibold text-foreground">{rasio.guruHonorer}</span>
             </li>
           </ul>
-          <Link to="/akademik" className="mt-5 inline-block text-xs font-semibold text-primary hover:underline">
+          <Link
+            to="/akademik"
+            className="mt-5 inline-block text-xs font-semibold text-primary hover:underline"
+          >
             Lihat data guru →
           </Link>
         </Card>
@@ -188,11 +221,23 @@ function CommandCenter() {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={TREN_KEHADIRAN}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                <XAxis dataKey="hari" tick={{ fontSize: 12 }} stroke="var(--color-muted-foreground)" />
-                <YAxis domain={[85, 100]} tick={{ fontSize: 12 }} stroke="var(--color-muted-foreground)" />
+                <XAxis
+                  dataKey="hari"
+                  tick={{ fontSize: 12 }}
+                  stroke="var(--color-muted-foreground)"
+                />
+                <YAxis
+                  domain={[85, 100]}
+                  tick={{ fontSize: 12 }}
+                  stroke="var(--color-muted-foreground)"
+                />
                 <Tooltip
                   formatter={(v: number) => [`${v}%`, "Kehadiran"]}
-                  contentStyle={{ borderRadius: 8, borderColor: "var(--color-border)", fontSize: 12 }}
+                  contentStyle={{
+                    borderRadius: 8,
+                    borderColor: "var(--color-border)",
+                    fontSize: 12,
+                  }}
                 />
                 <Line
                   type="monotone"
@@ -208,16 +253,26 @@ function CommandCenter() {
 
         <Card className="p-5">
           <h2 className="text-sm font-semibold text-foreground">Distribusi nilai</h2>
-          <p className="mb-4 text-xs text-muted-foreground">Seluruh mata pelajaran, semester berjalan.</p>
+          <p className="mb-4 text-xs text-muted-foreground">
+            Seluruh mata pelajaran, semester berjalan.
+          </p>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={DISTRIBUSI_NILAI}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                <XAxis dataKey="rentang" tick={{ fontSize: 11 }} stroke="var(--color-muted-foreground)" />
+                <XAxis
+                  dataKey="rentang"
+                  tick={{ fontSize: 11 }}
+                  stroke="var(--color-muted-foreground)"
+                />
                 <YAxis tick={{ fontSize: 12 }} stroke="var(--color-muted-foreground)" />
                 <Tooltip
                   formatter={(v: number) => [`${v} nilai`, "Jumlah"]}
-                  contentStyle={{ borderRadius: 8, borderColor: "var(--color-border)", fontSize: 12 }}
+                  contentStyle={{
+                    borderRadius: 8,
+                    borderColor: "var(--color-border)",
+                    fontSize: 12,
+                  }}
                 />
                 <Bar dataKey="jumlah" fill="var(--color-primary)" radius={[4, 4, 0, 0]} />
               </BarChart>
@@ -243,7 +298,10 @@ function CommandCenter() {
               );
             })}
           </ul>
-          <Link to="/keuangan" className="mt-5 inline-block text-xs font-semibold text-primary hover:underline">
+          <Link
+            to="/keuangan"
+            className="mt-5 inline-block text-xs font-semibold text-primary hover:underline"
+          >
             Lihat modul Keuangan →
           </Link>
         </Card>
@@ -263,7 +321,10 @@ function CommandCenter() {
               </li>
             ))}
           </ul>
-          <Link to="/keamanan" className="mt-5 inline-block text-xs font-semibold text-primary hover:underline">
+          <Link
+            to="/keamanan"
+            className="mt-5 inline-block text-xs font-semibold text-primary hover:underline"
+          >
             Lihat Smart Security →
           </Link>
         </Card>
@@ -271,7 +332,7 @@ function CommandCenter() {
         <Card className="p-5">
           <h2 className="text-sm font-semibold text-foreground">Pratinjau kanal notifikasi</h2>
           <ul className="mt-4 space-y-3">
-            {NOTIFIKASI.map((n) => (
+            {workflow.outbound.map((n) => (
               <li key={n.id} className="rounded-md border border-border p-3">
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-sm font-medium text-foreground">{n.penerima}</p>
@@ -283,7 +344,10 @@ function CommandCenter() {
               </li>
             ))}
           </ul>
-          <Link to="/komunikasi" className="mt-5 inline-block text-xs font-semibold text-primary hover:underline">
+          <Link
+            to="/komunikasi"
+            className="mt-5 inline-block text-xs font-semibold text-primary hover:underline"
+          >
             Lihat modul Komunikasi →
           </Link>
         </Card>
@@ -291,7 +355,9 @@ function CommandCenter() {
 
       <section className="mt-4">
         <Card className="p-5">
-          <h2 className="text-sm font-semibold text-foreground">Status perangkat & infrastruktur</h2>
+          <h2 className="text-sm font-semibold text-foreground">
+            Status perangkat & infrastruktur
+          </h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {PERANGKAT.map((d) => (
               <div key={d.id} className="rounded-md border border-border p-3">
@@ -315,15 +381,31 @@ function BerandaWaliMurid() {
   const { sesi } = useAuth();
   const workflow = useDemoWorkflow();
   const anak = SISWA.find((s) => s.id === sesi?.siswaId);
-  if (!anak) return <AppShell><PageHeader judul="Beranda Anak" deskripsi="Akun ini belum terhubung ke data anak." /></AppShell>;
+  if (!anak)
+    return (
+      <AppShell>
+        <PageHeader judul="Beranda Anak" deskripsi="Akun ini belum terhubung ke data anak." />
+      </AppShell>
+    );
   const tanggal = todayLocal();
-  const perubahan = workflow.attendance.find((item) => item.siswaId === anak.id && item.date === tanggal);
+  const perubahan = workflow.attendance.find(
+    (item) => item.siswaId === anak.id && item.date === tanggal,
+  );
   const presensi = perubahan
     ? { status: perubahan.status, jam: "-" }
     : PRESENSI_HARI_INI.find((p) => p.siswaId === anak.id && p.tanggal === tanggal);
-  const belumDibaca = workflow.notifications.filter((item) => item.siswaId === anak.id && !workflow.readIds.includes(item.id)).length;
-  const demoAnnouncements = workflow.announcements.map((item) => ({ id: item.id, judul: item.title, isi: item.body, target: item.target }));
-  const pengumuman = [...demoAnnouncements, ...PENGUMUMAN].filter((item) => sesi && announcementVisible(item.target as AnnouncementTarget, sesi));
+  const belumDibaca = workflow.notifications.filter(
+    (item) => item.siswaId === anak.id && !workflow.readIds.includes(item.id),
+  ).length;
+  const demoAnnouncements = workflow.announcements.map((item) => ({
+    id: item.id,
+    judul: item.title,
+    isi: item.body,
+    target: item.target,
+  }));
+  const pengumuman = demoAnnouncements.filter(
+    (item) => sesi && announcementVisible(item.target as AnnouncementTarget, sesi),
+  );
   const nilai = NILAI.filter((n) => n.siswaId === anak.id);
   const rataRata = nilai.length
     ? Math.round(nilai.reduce((jumlah, item) => jumlah + item.nilai, 0) / nilai.length)
@@ -339,10 +421,34 @@ function BerandaWaliMurid() {
       />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label={`Kehadiran ${tanggal}`} nilai={presensi?.status ?? "Belum tercatat"} keterangan={presensi?.jam && presensi.jam !== "-" ? `Tercatat pukul ${presensi.jam}` : "Lihat catatan dan pengajuan di Kehadiran"} icon={CalendarCheck} />
-        <StatCard label="Rata-rata nilai" nilai={rataRata} keterangan={`${nilai.length} mata pelajaran tercatat`} icon={GraduationCap} />
-        <StatCard label="Tugas aktif" nilai={tugas.length} keterangan="Untuk kelas anak Anda" icon={ClipboardList} />
-        <StatCard label="Buku dipinjam" nilai={pinjaman.length} keterangan="Peminjaman milik anak Anda" icon={BookOpen} />
+        <StatCard
+          label={`Kehadiran ${tanggal}`}
+          nilai={presensi?.status ?? "Belum tercatat"}
+          keterangan={
+            presensi?.jam && presensi.jam !== "-"
+              ? `Tercatat pukul ${presensi.jam}`
+              : "Lihat catatan dan pengajuan di Kehadiran"
+          }
+          icon={CalendarCheck}
+        />
+        <StatCard
+          label="Rata-rata nilai"
+          nilai={rataRata}
+          keterangan={`${nilai.length} mata pelajaran tercatat`}
+          icon={GraduationCap}
+        />
+        <StatCard
+          label="Tugas aktif"
+          nilai={tugas.length}
+          keterangan="Untuk kelas anak Anda"
+          icon={ClipboardList}
+        />
+        <StatCard
+          label="Buku dipinjam"
+          nilai={pinjaman.length}
+          keterangan="Peminjaman milik anak Anda"
+          icon={BookOpen}
+        />
       </section>
 
       <section className="mt-6 grid gap-4 lg:grid-cols-2">
@@ -350,17 +456,31 @@ function BerandaWaliMurid() {
           <h2 className="text-sm font-semibold text-foreground">Nilai terbaru</h2>
           <ul className="mt-4 space-y-3">
             {nilai.map((item) => (
-              <li key={item.mapel} className="flex items-center justify-between gap-3 border-b border-border pb-3 last:border-0 last:pb-0">
+              <li
+                key={item.mapel}
+                className="flex items-center justify-between gap-3 border-b border-border pb-3 last:border-0 last:pb-0"
+              >
                 <span className="text-sm text-foreground">{item.mapel}</span>
-                <StatusPill nada={item.nilai >= 80 ? "baik" : item.nilai >= 70 ? "peringatan" : "bahaya"}>{item.nilai}</StatusPill>
+                <StatusPill
+                  nada={item.nilai >= 80 ? "baik" : item.nilai >= 70 ? "peringatan" : "bahaya"}
+                >
+                  {item.nilai}
+                </StatusPill>
               </li>
             ))}
           </ul>
-          <Link to="/akademik" className="mt-5 inline-block text-xs font-semibold text-primary hover:underline">Lihat akademik anak →</Link>
+          <Link
+            to="/akademik"
+            className="mt-5 inline-block text-xs font-semibold text-primary hover:underline"
+          >
+            Lihat akademik anak →
+          </Link>
         </Card>
 
         <Card className="p-5">
-          <h2 className="text-sm font-semibold text-foreground">Informasi sekolah · {belumDibaca} pembaruan belum dibaca</h2>
+          <h2 className="text-sm font-semibold text-foreground">
+            Informasi sekolah · {belumDibaca} pembaruan belum dibaca
+          </h2>
           <ul className="mt-4 space-y-3">
             {pengumuman.slice(0, 3).map((p) => (
               <li key={p.id} className="rounded-md border border-border p-3">
@@ -369,7 +489,12 @@ function BerandaWaliMurid() {
               </li>
             ))}
           </ul>
-          <Link to="/komunikasi" className="mt-5 inline-block text-xs font-semibold text-primary hover:underline">Lihat semua informasi →</Link>
+          <Link
+            to="/komunikasi"
+            className="mt-5 inline-block text-xs font-semibold text-primary hover:underline"
+          >
+            Lihat semua informasi →
+          </Link>
         </Card>
       </section>
     </AppShell>

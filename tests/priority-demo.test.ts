@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { beforeEach, test } from "node:test";
 
-import { AKUN_DEMO } from "../src/lib/rbac";
+import { testActors } from "./test-actors";
 import { SISWA } from "../src/lib/demo-data";
 import {
   addStockItem,
@@ -38,7 +38,7 @@ Object.defineProperty(globalThis, "window", {
   configurable: true,
 });
 const KEY = "jli-ssms.priority-demo.v1";
-const actor = (role: string) => AKUN_DEMO.find((a) => a.peran === role)!;
+const actor = (role: string) => testActors.find((a) => a.peran === role)!;
 const operator = actor("operator"),
   sarpras = actor("sarpras"),
   guru = actor("guru"),

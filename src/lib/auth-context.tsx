@@ -7,18 +7,19 @@ import {
   useState,
   type ReactNode,
 } from "react";
-
-import { AKUN_DEMO, bolehAkses, bolehUbah, type Modul, type Sesi } from "@/lib/rbac";
-
-const KUNCI = "sms.sesi";
+import { loginAccount, logoutAccount, readSession, selectSchool } from "@/lib/auth.functions";
+import { bolehAkses, bolehUbah, type Modul, type Sesi } from "@/lib/rbac";
+import { hydrateSchoolData } from "@/lib/school-data";
+import { resetPrioritySnapshot } from "@/lib/priority-store";
+import { resetWorkflowSnapshot } from "@/lib/workflow-store";
 
 type AuthValue = {
-  /** undefined = belum selesai membaca penyimpanan (hidrasi) */
   sesi: Sesi | null | undefined;
   siapMemuat: boolean;
+  galatKoneksi: string | null;
   masuk: (email: string, kataSandi: string) => Promise<{ ok: boolean; pesan?: string }>;
-  masukSebagai: (sesi: Sesi) => void;
-  keluar: () => void;
+  keluar: () => Promise<void>;
+  pilihSekolah: (schoolId: string) => Promise<void>;
   bolehAkses: (modul: Modul) => boolean;
   bolehUbah: (modul: Modul) => boolean;
 };
@@ -27,57 +28,76 @@ const AuthContext = createContext<AuthValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [sesi, setSesi] = useState<Sesi | null | undefined>(undefined);
+  const [galatKoneksi, setGalatKoneksi] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(KUNCI);
-      const saved = raw ? (JSON.parse(raw) as Sesi) : null;
-      const demo =
-        saved && AKUN_DEMO.find((a) => a.email === saved.email && a.peran === saved.peran);
-      if (demo) {
-        const { kataSandi: _abaikan, ...profil } = demo;
-        setSesi(profil);
-      } else setSesi(saved);
-    } catch {
-      setSesi(null);
-    }
+    let alive = true;
+    readSession()
+      .then(async (value) => {
+        if (value) await hydrateSchoolData();
+        if (alive) setSesi(value);
+      })
+      .catch((error) => {
+        if (alive) {
+          console.error("Koneksi server sekolah gagal.", error);
+          setGalatKoneksi(
+            "Tidak dapat terhubung ke database MySQL. Periksa konfigurasi dan layanan server.",
+          );
+          setSesi(null);
+        }
+      });
+    return () => {
+      alive = false;
+    };
   }, []);
 
-  const simpan = useCallback((baru: Sesi | null) => {
-    setSesi(baru);
+  const masuk = useCallback<AuthValue["masuk"]>(async (email, kataSandi) => {
     try {
-      if (baru) window.localStorage.setItem(KUNCI, JSON.stringify(baru));
-      else window.localStorage.removeItem(KUNCI);
-    } catch {
-      /* abaikan */
-    }
-  }, []);
-
-  const masuk = useCallback<AuthValue["masuk"]>(
-    async (email, kataSandi) => {
-      // Placeholder autentikasi: nanti diganti supabase.auth.signInWithPassword.
-      await new Promise((r) => setTimeout(r, 350));
-      const akun = AKUN_DEMO.find((a) => a.email.toLowerCase() === email.trim().toLowerCase());
-      if (!akun) return { ok: false, pesan: "Email tidak terdaftar." };
-      if (akun.kataSandi !== kataSandi) return { ok: false, pesan: "Kata sandi salah." };
-      const { kataSandi: _abaikan, ...profil } = akun;
-      simpan(profil);
+      resetPrioritySnapshot();
+      resetWorkflowSnapshot();
+      const next = await loginAccount({ data: { email, password: kataSandi } });
+      await hydrateSchoolData();
+      setSesi(next);
+      setGalatKoneksi(null);
       return { ok: true };
-    },
-    [simpan],
-  );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Gagal masuk ke server.";
+      return {
+        ok: false,
+        pesan: /connect|database|DATABASE_URL|ECONNREFUSED|ETIMEDOUT/i.test(message)
+          ? "Tidak dapat terhubung ke database MySQL. Periksa konfigurasi dan layanan server."
+          : message,
+      };
+    }
+  }, []);
+
+  const keluar = useCallback(async () => {
+    await logoutAccount();
+    resetPrioritySnapshot();
+    resetWorkflowSnapshot();
+    setSesi(null);
+  }, []);
+
+  const pilihSekolah = useCallback(async (schoolId: string) => {
+    await selectSchool({ data: { schoolId } });
+    resetPrioritySnapshot();
+    resetWorkflowSnapshot();
+    setSesi(undefined);
+    window.location.reload();
+  }, []);
 
   const nilai = useMemo<AuthValue>(
     () => ({
       sesi,
       siapMemuat: sesi !== undefined,
+      galatKoneksi,
       masuk,
-      masukSebagai: (baru) => simpan(baru),
-      keluar: () => simpan(null),
+      keluar,
+      pilihSekolah,
       bolehAkses: (modul) => (sesi ? bolehAkses(sesi.peran, modul) : false),
       bolehUbah: (modul) => (sesi ? bolehUbah(sesi.peran, modul) : false),
     }),
-    [sesi, masuk, simpan],
+    [sesi, masuk, keluar, pilihSekolah, galatKoneksi],
   );
 
   return <AuthContext.Provider value={nilai}>{children}</AuthContext.Provider>;

@@ -1,7 +1,7 @@
 import type { DemoWorkflow } from "@/lib/demo-workflow";
 import { teacherKpi, type PriorityState } from "@/lib/priority-demo";
 
-/** All figures come from new, browser-local demo transactions, never sample or Cloud records. */
+/** Ringkasan transaksi prioritas dari snapshot MySQL sekolah aktif. */
 export function summarizePriorityUsage(priority: PriorityState, workflow: DemoWorkflow) {
   const teacherPeriods = new Map<string, { teacherId: string; semester: string }>();
   for (const assessment of priority.assessments) {

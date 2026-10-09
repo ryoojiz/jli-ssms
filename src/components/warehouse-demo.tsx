@@ -16,11 +16,11 @@ import {
   stockBalance,
   submitStockCount,
   usePriorityDemo,
-} from "@/lib/priority-demo";
+} from "@/lib/priority-store";
 
-const run = (action: () => void, message: string) => {
+const run = async (action: () => Promise<unknown>, message: string) => {
   try {
-    action();
+    await action();
     toast.success(message);
   } catch (error) {
     toast.error(error instanceof Error ? error.message : "Transaksi gagal.");
@@ -88,8 +88,8 @@ export function WarehouseDemo() {
             <Button
               className="self-end"
               onClick={() =>
-                run(() => {
-                  addStockItem(sesi, name, unit, location);
+                run(async () => {
+                  await addStockItem(sesi, name, unit, location);
                   setName("");
                   setUnit("");
                   setLocation("");
@@ -167,8 +167,8 @@ export function WarehouseDemo() {
               {!["siswa", "walimurid", "auditor", "kepala_sekolah"].includes(sesi.peran) && (
                 <Button
                   onClick={() =>
-                    run(() => {
-                      requestStock(sesi, selected, Number(qty), note);
+                    run(async () => {
+                      await requestStock(sesi, selected, Number(qty), note);
                       setQty("");
                       setNote("");
                     }, "Permintaan dikirim ke sarpras.")
@@ -181,8 +181,8 @@ export function WarehouseDemo() {
                 <Button
                   variant="outline"
                   onClick={() =>
-                    run(() => {
-                      receiveStock(sesi, selected, Number(qty), note);
+                    run(async () => {
+                      await receiveStock(sesi, selected, Number(qty), note);
                       setQty("");
                       setNote("");
                     }, "Barang masuk dicatat.")
@@ -303,9 +303,9 @@ export function WarehouseDemo() {
               <Button
                 className="self-end"
                 onClick={() =>
-                  run(() => {
+                  run(async () => {
                     if (observed.trim() === "") throw new Error("Isi jumlah fisik hasil opname.");
-                    submitStockCount(sesi, selected, Number(observed), reason);
+                    await submitStockCount(sesi, selected, Number(observed), reason);
                     setObserved("");
                     setReason("");
                   }, "Opname menunggu persetujuan operator.")

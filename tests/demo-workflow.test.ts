@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { beforeEach, test } from "node:test";
 
-import { AKUN_DEMO } from "../src/lib/rbac";
+import { testActors } from "./test-actors";
 import {
   announcementVisible,
   canManageAttendance,
@@ -27,10 +27,10 @@ Object.defineProperty(globalThis, "window", {
 });
 
 const KEY = "jli-ssms.demo-workflow.v1";
-const parent = AKUN_DEMO.find((account) => account.peran === "walimurid")!;
-const classTeacher = AKUN_DEMO.find((account) => account.peran === "wali_kelas")!;
-const operator = AKUN_DEMO.find((account) => account.peran === "operator")!;
-const subjectTeacher = AKUN_DEMO.find((account) => account.peran === "guru")!;
+const parent = testActors.find((account) => account.peran === "walimurid")!;
+const classTeacher = testActors.find((account) => account.peran === "wali_kelas")!;
+const operator = testActors.find((account) => account.peran === "operator")!;
+const subjectTeacher = testActors.find((account) => account.peran === "guru")!;
 
 function saved(): DemoWorkflow {
   return JSON.parse(storage.get(KEY)!) as DemoWorkflow;

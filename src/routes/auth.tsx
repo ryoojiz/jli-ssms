@@ -1,15 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { GraduationCap, LogIn } from "lucide-react";
+import { LogIn } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useAuth } from "@/lib/auth-context";
 import logoDkiAsset from "@/assets/logo-dki.png.asset.json";
 import logoJliAsset from "@/assets/logo-jli.png.asset.json";
 import welcomeDigitalSchool from "@/assets/welcome-digital-school.jpg";
-import { SCHOOL } from "@/lib/demo-data";
-import { AKUN_DEMO, PERAN_LABEL } from "@/lib/rbac";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -34,10 +31,10 @@ export const Route = createFileRoute("/auth")({
 });
 
 function HalamanAuth() {
-  const { sesi, masuk } = useAuth();
+  const { sesi, masuk, galatKoneksi } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("operator@sdn01.sch.id");
-  const [kataSandi, setKataSandi] = useState("demo1234");
+  const [email, setEmail] = useState("");
+  const [kataSandi, setKataSandi] = useState("");
   const [galat, setGalat] = useState<string | null>(null);
   const [proses, setProses] = useState(false);
 
@@ -103,7 +100,7 @@ function HalamanAuth() {
               </p>
             </div>
             <p className="mt-2 text-xs text-sidebar-foreground/70">
-              Tahun Ajaran {SCHOOL.tahunAjaran} · Semester {SCHOOL.semester} · Zona Asia/Jakarta
+              Sekolah Negeri Jakarta · Zona Asia/Jakarta
             </p>
           </div>
         </div>
@@ -117,10 +114,10 @@ function HalamanAuth() {
               alt="Logo Pemerintah DKI Jakarta"
               className="h-12 w-12 shrink-0 object-contain"
             />
-              <div className="min-w-0">
-                <p className="text-sm font-semibold leading-snug">SISTEM MANAJEMEN SEKOLAH</p>
-                <p className="text-xs text-muted-foreground">{SCHOOL.nama}</p>
-              </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold leading-snug">SISTEM MANAJEMEN SEKOLAH</p>
+              <p className="text-xs text-muted-foreground">Sekolah Negeri Jakarta</p>
+            </div>
             <img
               src={logoJliAsset.url}
               alt="Logo JLI"
@@ -130,7 +127,7 @@ function HalamanAuth() {
 
           <h2 className="text-2xl font-bold text-foreground">Masuk ke akun sekolah</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Pilih peran yang tersedia atau masukkan email dan kata sandi Anda.
+            Masukkan email dan kata sandi akun sekolah Anda.
           </p>
 
           <form onSubmit={kirim} className="mt-6 space-y-4">
@@ -157,9 +154,12 @@ function HalamanAuth() {
               />
             </div>
 
-            {galat ? (
-              <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {galat}
+            {galat || galatKoneksi ? (
+              <p
+                role="alert"
+                className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive"
+              >
+                {galat ?? galatKoneksi}
               </p>
             ) : null}
 
@@ -168,36 +168,6 @@ function HalamanAuth() {
               {proses ? "Memproses…" : "Masuk"}
             </Button>
           </form>
-
-          <Card className="mt-6 p-4">
-            <p className="flex items-center gap-2 text-sm font-semibold">
-              <GraduationCap className="size-4 text-primary" />
-              Coba sebagai peran lain
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Pilih peran untuk mengisi akun secara otomatis.
-            </p>
-            <div className="mt-3 grid max-h-60 gap-1 overflow-y-auto">
-              {AKUN_DEMO.map((a) => (
-                <button
-                  key={a.email}
-                  type="button"
-                  onClick={() => {
-                    setEmail(a.email);
-                    setKataSandi(a.kataSandi);
-                    setGalat(null);
-                  }}
-                  className="flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2 text-left text-xs transition-colors hover:bg-accent"
-                >
-                  <span>
-                    <span className="block font-semibold text-foreground">{PERAN_LABEL[a.peran]}</span>
-                    <span className="text-muted-foreground">{a.email}</span>
-                  </span>
-                  <span className="shrink-0 text-[0.68rem] text-muted-foreground">pilih</span>
-                </button>
-              ))}
-            </div>
-          </Card>
         </div>
       </section>
     </div>

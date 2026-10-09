@@ -163,6 +163,7 @@ export function formatDemoDateTime(value: string) {
 export function canManageAttendance(actor: Sesi | null | undefined, kelasId: string) {
   if (actor?.peran === "operator") return true;
   if (actor?.peran !== "wali_kelas") return false;
+  if (actor.classId) return actor.classId === kelasId;
   const match = actor.konteks?.match(/Kelas\s+(\d+)([A-Z])/i);
   return match?.[1] && match[2] ? `K${match[1]}${match[2].toUpperCase()}` === kelasId : false;
 }

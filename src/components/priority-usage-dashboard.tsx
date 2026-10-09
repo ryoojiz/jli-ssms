@@ -3,8 +3,8 @@ import { BookOpen, Boxes, CalendarCheck, ChartNoAxesCombined, GraduationCap } fr
 
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth-context";
-import { useDemoWorkflow } from "@/lib/demo-workflow";
-import { usePriorityDemo } from "@/lib/priority-demo";
+import { useDemoWorkflow } from "@/lib/workflow-store";
+import { usePriorityDemo } from "@/lib/priority-store";
 import { summarizePriorityUsage } from "@/lib/priority-usage";
 
 function ratio(done: number, total: number) {
@@ -71,8 +71,8 @@ export function PriorityUsageDashboard() {
         </h2>
         <p className="text-sm text-muted-foreground">
           Ringkasan aktivitas gudang, kehadiran, perpustakaan, penilaian, dan administrasi guru
-          untuk seluruh tanggal dan semester. KPI guru mengukur proses administrasi penilaian,
-          bukan kinerja kepegawaian.
+          untuk seluruh tanggal dan semester. KPI guru mengukur proses administrasi penilaian, bukan
+          kinerja kepegawaian.
         </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">

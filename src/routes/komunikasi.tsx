@@ -18,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { NOTIFIKASI, PENGUMUMAN } from "@/lib/demo-data";
 import { useAuth } from "@/lib/auth-context";
 import {
   announcementVisible,
@@ -27,7 +26,7 @@ import {
   publishAnnouncement,
   useDemoWorkflow,
   type AnnouncementTarget,
-} from "@/lib/demo-workflow";
+} from "@/lib/workflow-store";
 
 export const Route = createFileRoute("/komunikasi")({
   head: () => ({
@@ -64,7 +63,7 @@ function Komunikasi() {
     tanggal: formatDemoDateTime(item.publishedAt),
     pengirim: item.author,
   }));
-  const daftar = [...demoAnnouncements, ...PENGUMUMAN];
+  const daftar = demoAnnouncements;
   const pengumumanTerlihat = sesi
     ? daftar.filter((item) => announcementVisible(item.target as AnnouncementTarget, sesi))
     : [];
@@ -73,10 +72,10 @@ function Komunikasi() {
   );
   const belumDibaca = pemberitahuan.filter((item) => !workflow.readIds.includes(item.id)).length;
 
-  function kirim() {
+  async function kirim() {
     if (!sesi) return;
     try {
-      publishAnnouncement(sesi, judul, isi, target);
+      await publishAnnouncement(sesi, judul, isi, target);
       setJudul("");
       setIsi("");
       toast.success("Pengumuman tersimpan.");
@@ -136,7 +135,13 @@ function Komunikasi() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => markNotificationRead(sesi, item.id)}
+                      onClick={() =>
+                        void markNotificationRead(sesi, item.id).catch((error) =>
+                          toast.error(
+                            error instanceof Error ? error.message : "Gagal menandai pembaruan.",
+                          ),
+                        )
+                      }
                     >
                       Tandai dibaca
                     </Button>
@@ -228,7 +233,7 @@ function Komunikasi() {
           <TabelData
             judul="Pratinjau kanal notifikasi eksternal"
             deskripsi="Pengiriman WhatsApp, email, dan push belum tersedia."
-            data={NOTIFIKASI}
+            data={workflow.outbound}
             kolom={[
               { judul: "ID", render: (n) => n.id },
               { judul: "Kanal", render: (n) => <StatusPill>{n.kanal}</StatusPill> },

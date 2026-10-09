@@ -5,7 +5,7 @@ import { KELAS, MAPEL, SISWA } from "@/lib/demo-data";
 import type { Sesi } from "@/lib/rbac";
 
 const KEY = "jli-ssms.priority-demo.v1";
-export const DEMO_SCHOOL_ID = "demo-sdn01";
+export const DEMO_SCHOOL_ID = "SDN-KBG-01";
 const date = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -17,7 +17,7 @@ const date = z
 const stamp = z.string().refine((v) => Number.isFinite(Date.parse(v)));
 const base = {
   id: z.string(),
-  schoolId: z.literal(DEMO_SCHOOL_ID),
+  schoolId: z.string(),
   createdAt: stamp,
   createdBy: z.string(),
 };
@@ -88,7 +88,7 @@ const assessmentSchema = z.object({
   edits: z.array(editSchema),
 });
 const weightSchema = z.object({
-  schoolId: z.literal(DEMO_SCHOOL_ID),
+  schoolId: z.string(),
   classId: z.string(),
   subject: z.string(),
   semester: z.string(),
@@ -106,7 +106,7 @@ const noteSchema = z.object({
 });
 const schema = z.object({
   version: z.literal(1),
-  schoolId: z.literal(DEMO_SCHOOL_ID),
+  schoolId: z.string(),
   items: z.array(itemSchema),
   movements: z.array(movementSchema),
   requests: z.array(requestSchema),
@@ -118,6 +118,25 @@ const schema = z.object({
   assessments: z.array(assessmentSchema),
   weights: z.array(weightSchema),
   notes: z.array(noteSchema),
+  studentCounts: z
+    .array(z.object({ classId: z.string(), count: z.number().int().nonnegative() }))
+    .optional(),
+  students: z.array(z.object({ id: z.string(), nama: z.string(), kelasId: z.string() })).optional(),
+  classes: z
+    .array(
+      z.object({
+        id: z.string(),
+        nama: z.string(),
+        tingkat: z.number(),
+        homeroomTeacherId: z.string().nullable(),
+      }),
+    )
+    .optional(),
+  subjects: z.array(z.string()).optional(),
+  teachers: z.array(z.object({ id: z.string(), nama: z.string(), mapel: z.string() })).optional(),
+  teacherAssignments: z
+    .array(z.object({ teacherId: z.string(), classId: z.string(), subject: z.string() }))
+    .optional(),
 });
 
 export type PriorityState = z.infer<typeof schema>;
@@ -659,7 +678,7 @@ export function studentGradeSummary(
   subject: string,
   semester: string,
 ) {
-  const student = SISWA.find((s) => s.id === studentId);
+  const student = (snapshot.students ?? SISWA).find((s) => s.id === studentId);
   const weights = snapshot.weights.find(
     (w) => w.classId === student?.kelasId && w.subject === subject && w.semester === semester,
   );
@@ -703,12 +722,18 @@ export function teacherKpi(snapshot: PriorityState, teacherId: string, semester:
     (a) => a.teacherId === teacherId && a.semester === semester,
   );
   const entriesTotal = assessments.reduce(
-    (sum, a) => sum + SISWA.filter((s) => s.kelasId === a.classId).length,
+    (sum, a) =>
+      sum +
+      (snapshot.studentCounts?.find((x) => x.classId === a.classId)?.count ??
+        SISWA.filter((s) => s.kelasId === a.classId).length),
     0,
   );
   const entriesDone = assessments.reduce(
     (sum, a) =>
-      sum + SISWA.filter((s) => s.kelasId === a.classId && a.scores[s.id] !== undefined).length,
+      sum +
+      (snapshot.studentCounts
+        ? Object.keys(a.scores).length
+        : SISWA.filter((s) => s.kelasId === a.classId && a.scores[s.id] !== undefined).length),
     0,
   );
   const deadlinePassed = assessments.filter(

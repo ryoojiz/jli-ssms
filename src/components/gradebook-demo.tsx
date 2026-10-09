@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth-context";
-import { KELAS, MAPEL, SISWA } from "@/lib/demo-data";
 import {
   canAssess,
   createAssessment,
@@ -16,12 +15,11 @@ import {
   studentGradeSummary,
   usePriorityDemo,
   type AssessmentKind,
-} from "@/lib/priority-demo";
+} from "@/lib/priority-store";
 
-const DEFAULT_SEMESTER = "2026/2027 Ganjil";
-const run = (action: () => void, message: string) => {
+const run = async (action: () => Promise<unknown>, message: string) => {
   try {
-    action();
+    await action();
     toast.success(message);
   } catch (error) {
     toast.error(error instanceof Error ? error.message : "Perubahan nilai gagal.");
@@ -31,7 +29,12 @@ const run = (action: () => void, message: string) => {
 export function GradebookDemo() {
   const { sesi } = useAuth();
   const state = usePriorityDemo();
-  const [semester, setSemester] = useState(DEFAULT_SEMESTER);
+  const KELAS = state.classes ?? [];
+  const MAPEL = state.subjects ?? [];
+  const SISWA = state.students ?? [];
+  const [semester, setSemester] = useState(() =>
+    [sesi?.academicYear, sesi?.semester].filter(Boolean).join(" "),
+  );
   const [classId, setClassId] = useState("K5A");
   const [subject, setSubject] = useState("Bahasa Indonesia");
   const [title, setTitle] = useState("");
@@ -40,6 +43,13 @@ export function GradebookDemo() {
   const [daily, setDaily] = useState("");
   const [pts, setPts] = useState("");
   const [pas, setPas] = useState("");
+  useEffect(() => {
+    const classes = state.classes;
+    const subjects = state.subjects;
+    if (classes?.length && !classes.some((kelas) => kelas.id === classId))
+      setClassId(classes[0]!.id);
+    if (subjects?.length && !subjects.includes(subject)) setSubject(subjects[0]!);
+  }, [state.classes, state.subjects, classId, subject]);
   if (!sesi) return null;
   const parent = ["walimurid", "siswa"].includes(sesi.peran);
   const student = SISWA.find((s) => s.id === sesi.siswaId);
@@ -72,8 +82,8 @@ export function GradebookDemo() {
       <Card className="p-5">
         <h2 className="font-semibold">Nilai harian, PTS, dan PAS</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Nilai akhir dihitung dari penilaian yang diterbitkan dan bobot yang lengkap. Orang tua
-          dan siswa hanya melihat penilaian yang dipublikasikan.
+          Nilai akhir dihitung dari penilaian yang diterbitkan dan bobot yang lengkap. Orang tua dan
+          siswa hanya melihat penilaian yang dipublikasikan.
         </p>
         <div className="mt-3 flex flex-wrap gap-3">
           <div>
@@ -199,8 +209,8 @@ export function GradebookDemo() {
         <Card className="p-5">
           <h2 className="font-semibold">Buat penilaian</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Guru hanya dapat menilai kelas dan mapel yang diampu. Setelah dibuat, isi nilai
-            seluruh siswa sebelum publikasi.
+            Guru hanya dapat menilai kelas dan mapel yang diampu. Setelah dibuat, isi nilai seluruh
+            siswa sebelum publikasi.
           </p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div>
@@ -257,8 +267,16 @@ export function GradebookDemo() {
           <Button
             className="mt-3"
             onClick={() =>
-              run(() => {
-                createAssessment(sesi, activeClass, activeSubject, semester, kind, title, deadline);
+              run(async () => {
+                await createAssessment(
+                  sesi,
+                  activeClass,
+                  activeSubject,
+                  semester,
+                  kind,
+                  title,
+                  deadline,
+                );
                 setTitle("");
               }, "Penilaian dibuat sebagai draft.")
             }
@@ -291,8 +309,7 @@ export function GradebookDemo() {
         <h2 className="font-semibold">Daftar penilaian</h2>
         {assessments.length === 0 ? (
           <p className="mt-3 text-sm text-muted-foreground">
-            Belum ada penilaian yang{" "}
-            {parent ? "dipublikasikan untuk anak ini" : "sesuai filter"}.
+            Belum ada penilaian yang {parent ? "dipublikasikan untuk anak ini" : "sesuai filter"}.
           </p>
         ) : (
           <div className="mt-3 space-y-4">

@@ -6,8 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth-context";
-import { GURU } from "@/lib/demo-data";
-import { addTeacherKpiNote, teacherKpi, usePriorityDemo } from "@/lib/priority-demo";
+import { addTeacherKpiNote, teacherKpi, usePriorityDemo } from "@/lib/priority-store";
 
 const pct = (done: number, total: number) =>
   total === 0 ? "Belum cukup data" : `${Math.round((done / total) * 100)}% (${done}/${total})`;
@@ -15,7 +14,10 @@ const pct = (done: number, total: number) =>
 export function TeacherKpiDemo() {
   const { sesi } = useAuth();
   const state = usePriorityDemo();
-  const [semester, setSemester] = useState("2026/2027 Ganjil");
+  const GURU = state.teachers ?? [];
+  const [semester, setSemester] = useState(() =>
+    [sesi?.academicYear, sesi?.semester].filter(Boolean).join(" "),
+  );
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   if (!sesi || !["kepala_sekolah", "operator", "auditor"].includes(sesi.peran)) return null;
   return (
@@ -50,8 +52,8 @@ export function TeacherKpiDemo() {
                 </p>
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                Sumber: penilaian yang dibuat guru ini pada {semester}. Tenggat yang belum
-                lewat tidak masuk indikator ketepatan waktu.
+                Sumber: penilaian yang dibuat guru ini pada {semester}. Tenggat yang belum lewat
+                tidak masuk indikator ketepatan waktu.
               </p>
               {notes.length > 0 && (
                 <div className="mt-3 border-t pt-2">
@@ -73,9 +75,9 @@ export function TeacherKpiDemo() {
                   />
                   <Button
                     size="sm"
-                    onClick={() => {
+                    onClick={async () => {
                       try {
-                        addTeacherKpiNote(sesi, guru.id, semester, drafts[guru.id] ?? "");
+                        await addTeacherKpiNote(sesi, guru.id, semester, drafts[guru.id] ?? "");
                         setDrafts((d) => ({ ...d, [guru.id]: "" }));
                         toast.success("Catatan tersimpan.");
                       } catch (error) {

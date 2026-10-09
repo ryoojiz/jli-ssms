@@ -11,15 +11,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/lib/auth-context";
 import { SCHOOL } from "@/lib/demo-data";
-import {
-  analisisLaporanSekolah,
-  type HasilAnalisisLaporan,
-} from "@/lib/laporan.functions";
+import { analisisLaporanSekolah, type HasilAnalisisLaporan } from "@/lib/laporan.functions";
 
 export const Route = createFileRoute("/laporan")({
   head: () => ({
     meta: [
-      { title: "Analisis Laporan Sekolah dengan AI | SDN Kebagusan 01 Pagi" },
+      { title: "Analisis Laporan Sekolah dengan AI | JLI SSMS" },
       {
         name: "description",
         content:
@@ -37,18 +34,12 @@ export const Route = createFileRoute("/laporan")({
   component: LaporanAI,
 });
 
-const CONTOH = `Kehadiran siswa bulan ini 94,2 persen, turun 1,8 persen dibanding bulan lalu terutama di kelas 5.
-Nilai rata-rata ulangan harian Matematika kelas 4 hanya 68, di bawah KKM 70.
-Serapan dana BOS triwulan ini 71 persen, pembelian buku perpustakaan belum direalisasi.
-Dua unit AC ruang kelas 6 rusak dan tiga proyektor perlu perawatan.
-Kegiatan ekstrakurikuler pramuka berjalan baik dengan partisipasi 85 persen siswa.`;
-
 function LaporanAI() {
   const { bolehAkses } = useAuth();
   const jalankan = useServerFn(analisisLaporanSekolah);
 
   const [judul, setJudul] = useState("Laporan Bulanan Operasional Sekolah");
-  const [periode, setPeriode] = useState("September 2026");
+  const [periode, setPeriode] = useState("");
   const [teks, setTeks] = useState("");
   const [memuat, setMemuat] = useState(false);
   const [galat, setGalat] = useState<string | null>(null);
@@ -91,7 +82,11 @@ function LaporanAI() {
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="periode">Periode</Label>
-                  <Input id="periode" value={periode} onChange={(e) => setPeriode(e.target.value)} />
+                  <Input
+                    id="periode"
+                    value={periode}
+                    onChange={(e) => setPeriode(e.target.value)}
+                  />
                 </div>
               </div>
 
@@ -121,9 +116,6 @@ function LaporanAI() {
                       <Sparkle className="size-4" aria-hidden /> Buat ringkasan & rekomendasi
                     </>
                   )}
-                </Button>
-                <Button type="button" variant="outline" onClick={() => setTeks(CONTOH)}>
-                  Isi draft laporan
                 </Button>
               </div>
             </form>
@@ -155,7 +147,9 @@ function LaporanAI() {
                   <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Ringkasan
                   </h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-foreground">{hasil.ringkasan}</p>
+                  <p className="mt-1.5 text-sm leading-relaxed text-foreground">
+                    {hasil.ringkasan}
+                  </p>
                 </section>
 
                 {hasil.poinUtama.length ? (

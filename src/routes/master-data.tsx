@@ -1,23 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Database, History, School, UsersRound } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { AppShell, PageHeader, StatusPill } from "@/components/app-shell";
 import { TabelData } from "@/components/data-table";
-import { useDataCloud } from "@/lib/data-cloud";
+import { muatUlangDataCloud, useDataCloud } from "@/lib/data-cloud";
+import { useAuth } from "@/lib/auth-context";
 import { StatCard } from "@/components/stat-card";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  AUDIT_LOG,
-  GURU,
-  KELAS,
-  PERAN,
-  SCHOOL,
-  SISWA,
-  namaKelas,
-} from "@/lib/demo-data";
+import { AUDIT_LOG, GURU, KELAS, PERAN, SCHOOL, SISWA, namaKelas } from "@/lib/demo-data";
 
 export const Route = createFileRoute("/master-data")({
   head: () => ({
@@ -39,7 +32,12 @@ export const Route = createFileRoute("/master-data")({
 });
 
 function MasterData() {
+  const { sesi } = useAuth();
   useDataCloud();
+  useEffect(() => {
+    if (sesi?.schoolId)
+      void muatUlangDataCloud().catch((error) => console.error("Audit tidak dapat dimuat.", error));
+  }, [sesi?.schoolId]);
   const [cari, setCari] = useState("");
   const siswa = SISWA.filter(
     (s) =>
@@ -56,10 +54,30 @@ function MasterData() {
       />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Profil sekolah" nilai={SCHOOL.npsn} keterangan={SCHOOL.nama} icon={School} />
-        <StatCard label="Data siswa" nilai={SISWA.length} keterangan="Terverifikasi NISN" icon={UsersRound} />
-        <StatCard label="Data guru & tendik" nilai={GURU.length} keterangan="PNS, PPPK, honorer" icon={Database} />
-        <StatCard label="Entri audit" nilai={AUDIT_LOG.length} keterangan="Retensi minimal 30 hari" icon={History} />
+        <StatCard
+          label="Profil sekolah"
+          nilai={SCHOOL.npsn}
+          keterangan={SCHOOL.nama}
+          icon={School}
+        />
+        <StatCard
+          label="Data siswa"
+          nilai={SISWA.length}
+          keterangan="Terdaftar di sekolah aktif"
+          icon={UsersRound}
+        />
+        <StatCard
+          label="Data guru & tendik"
+          nilai={GURU.length}
+          keterangan="PNS, PPPK, honorer"
+          icon={Database}
+        />
+        <StatCard
+          label="Entri audit"
+          nilai={AUDIT_LOG.length}
+          keterangan="Riwayat perubahan tersimpan"
+          icon={History}
+        />
       </section>
 
       <Tabs defaultValue="siswa" className="mt-6">

@@ -44,8 +44,7 @@ export const Route = createFileRoute("/akademik")({
       { title: "Akademik — Jadwal dan Penilaian | SSMS" },
       {
         name: "description",
-        content:
-          "Jadwal pelajaran, tugas, ujian, dan pengelolaan penilaian siswa.",
+        content: "Jadwal pelajaran, tugas, ujian, dan pengelolaan penilaian siswa.",
       },
       { property: "og:title", content: "Modul Akademik — SMS Sekolah" },
       {
@@ -64,7 +63,9 @@ function Akademik() {
   const [kelasId, setKelasId] = useState("K5A");
   const kelasAktif = pribadi
     ? (SISWA.find((s) => s.id === sesi?.siswaId)?.kelasId ?? kelasId)
-    : kelasId;
+    : KELAS.some((k) => k.id === kelasId)
+      ? kelasId
+      : (KELAS[0]?.id ?? "");
   const jadwalKelas = JADWAL.filter((j) => j.kelasId === kelasAktif);
   const siswaKelas = SISWA.filter(
     (s) => s.kelasId === kelasAktif && (!pribadi || s.id === sesi?.siswaId),
@@ -86,7 +87,7 @@ function Akademik() {
         }
         aksi={
           pribadi ? undefined : (
-            <Select value={kelasId} onValueChange={setKelasId}>
+            <Select value={kelasAktif} onValueChange={setKelasId}>
               <SelectTrigger className="w-44">
                 <SelectValue />
               </SelectTrigger>

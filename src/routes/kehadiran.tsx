@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/lib/auth-context";
-import { useDataCloud } from "@/lib/data-cloud";
 import {
   canManageAttendance,
   createLeaveRequest,
@@ -30,18 +29,8 @@ import {
   reviewLeaveRequest,
   todayLocal,
   useDemoWorkflow,
-} from "@/lib/demo-workflow";
-import {
-  IZIN,
-  KELAS,
-  PRESENSI_HARI_INI,
-  SISWA,
-  TREN_KEHADIRAN,
-  STATUS_HADIR,
-  namaKelas,
-  rekapPresensi,
-  type Presensi,
-} from "@/lib/demo-data";
+} from "@/lib/workflow-store";
+import { STATUS_HADIR, rekapPresensi, type Presensi } from "@/lib/demo-data";
 
 export const Route = createFileRoute("/kehadiran")({
   head: () => ({
@@ -55,8 +44,7 @@ export const Route = createFileRoute("/kehadiran")({
       { property: "og:title", content: "Modul Kehadiran — SMS Sekolah" },
       {
         property: "og:description",
-        content:
-          "Pencatatan manual, izin, rekap kelas, dan pembaruan untuk wali murid.",
+        content: "Pencatatan manual, izin, rekap kelas, dan pembaruan untuk wali murid.",
       },
     ],
   }),
@@ -65,8 +53,13 @@ export const Route = createFileRoute("/kehadiran")({
 
 function Kehadiran() {
   const { sesi } = useAuth();
-  useDataCloud();
   const workflow = useDemoWorkflow();
+  const IZIN = workflow.historicLeave;
+  const KELAS = workflow.classes;
+  const PRESENSI_HARI_INI = workflow.sampleAttendance;
+  const SISWA = workflow.students;
+  const TREN_KEHADIRAN = workflow.trends;
+  const namaKelas = (id: string) => KELAS.find((kelas) => kelas.id === id)?.nama ?? id;
   const waliMurid = sesi?.peran === "walimurid";
   const siswaAnak = SISWA.find((s) => s.id === sesi?.siswaId);
   const kelasWali =
@@ -76,7 +69,9 @@ function Kehadiran() {
   const [jenis, setJenis] = useState<"Izin" | "Sakit">("Izin");
   const [alasan, setAlasan] = useState("");
   const [tanggalIzin, setTanggalIzin] = useState(todayLocal);
-  const kelasAktif = waliMurid ? (siswaAnak?.kelasId ?? kelasId) : (kelasWali?.id ?? kelasId);
+  const kelasAktif = waliMurid
+    ? (siswaAnak?.kelasId ?? kelasId)
+    : (kelasWali?.id ?? (KELAS.some((k) => k.id === kelasId) ? kelasId : (KELAS[0]?.id ?? "")));
   const siswaKelas = SISWA.filter(
     (s) => s.kelasId === kelasAktif && (!waliMurid || s.id === sesi?.siswaId),
   );
@@ -94,10 +89,10 @@ function Kehadiran() {
     waliMurid ? r.siswaId === sesi?.siswaId : r.kelasId === kelasAktif,
   );
 
-  function ajukanIzin() {
+  async function ajukanIzin() {
     if (!sesi) return;
     try {
-      createLeaveRequest(sesi, jenis, tanggalIzin, alasan);
+      await createLeaveRequest(sesi, jenis, tanggalIzin, alasan);
       setAlasan("");
       toast.success("Pengajuan tersimpan.");
     } catch (error) {
@@ -105,20 +100,20 @@ function Kehadiran() {
     }
   }
 
-  function putuskan(requestId: string, decision: "Disetujui" | "Ditolak") {
+  async function putuskan(requestId: string, decision: "Disetujui" | "Ditolak") {
     if (!sesi) return;
     try {
-      reviewLeaveRequest(sesi, requestId, decision);
+      await reviewLeaveRequest(sesi, requestId, decision);
       toast.success(`Pengajuan ${decision.toLowerCase()}.`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Peninjauan gagal.");
     }
   }
 
-  function catat(siswaId: string, status: (typeof STATUS_HADIR)[number]) {
+  async function catat(siswaId: string, status: (typeof STATUS_HADIR)[number]) {
     if (!sesi) return;
     try {
-      recordAttendance(sesi, siswaId, tanggal, status);
+      await recordAttendance(sesi, siswaId, tanggal, status);
       toast.success("Kehadiran diperbarui.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Pencatatan gagal.");
@@ -127,7 +122,7 @@ function Kehadiran() {
 
   const perKelas = KELAS.map((k) => {
     const list = PRESENSI_HARI_INI.filter(
-      (p) => p.siswaId.startsWith(k.id) && p.tanggal === "2026-09-04",
+      (p) => p.siswaId.startsWith(k.id) && p.tanggal === tanggal,
     );
     const hadir = list.filter((p) => p.status === "Hadir" || p.status === "Terlambat").length;
     return { kelas: k.nama, persen: list.length ? Math.round((hadir / list.length) * 100) : 0 };
@@ -144,7 +139,7 @@ function Kehadiran() {
         }
         aksi={
           waliMurid || kelasWali ? undefined : (
-            <Select value={kelasId} onValueChange={setKelasId}>
+            <Select value={kelasAktif} onValueChange={setKelasId}>
               <SelectTrigger className="w-44">
                 <SelectValue />
               </SelectTrigger>
@@ -174,7 +169,9 @@ function Kehadiran() {
         <Button variant="outline" onClick={() => setTanggal("2026-09-04")}>
           Lihat 4 Sep 2026
         </Button>
-        <p className="text-xs text-muted-foreground">Pilih tanggal untuk melihat atau mencatat kehadiran.</p>
+        <p className="text-xs text-muted-foreground">
+          Pilih tanggal untuk melihat atau mencatat kehadiran.
+        </p>
       </Card>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -239,9 +236,7 @@ function Kehadiran() {
           </Card>
 
           <Card className="p-5">
-            <h2 className="text-sm font-semibold text-foreground">
-              Tren mingguan
-            </h2>
+            <h2 className="text-sm font-semibold text-foreground">Tren mingguan</h2>
             <div className="mt-4 h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={TREN_KEHADIRAN}>

@@ -1,31 +1,30 @@
-/**
- * Turunan data guru (demo, deterministik): kelas yang diampu, status
- * pengumpulan tugas per siswa, dan nilai awal ujian.
- * Nantinya diganti query Lovable Cloud tanpa mengubah UI.
- */
+/** Turunan data akademik dari snapshot sekolah yang telah dimuat dari MySQL. */
 
 import { JADWAL, KELAS, NILAI, SISWA, TUGAS, UJIAN, type Kelas, type Siswa } from "@/lib/demo-data";
 import type { Sesi } from "@/lib/rbac";
 
-function acak(n: number, mod: number) {
-  return (((n * 9301 + 49297) % 233280) + 233280) % 233280 % mod;
-}
+export const PENGUMPULAN_TUGAS: Array<{
+  tugasId: string;
+  siswaId: string;
+  waktu: string | null;
+  terlambat: boolean;
+  nilaiAwal: number | null;
+}> = [];
 
 /** Kelas yang menjadi tanggung jawab pengguna (guru / wali kelas). */
 export function kelasTanggungJawab(sesi: Sesi | null | undefined): Kelas[] {
   if (!sesi) return [];
   if (sesi.peran === "wali_kelas") {
+    if (sesi.classId) return KELAS.filter((kelas) => kelas.id === sesi.classId);
     const nama = (sesi.konteks ?? "").replace(/kelas/i, "").trim();
     const cocok = KELAS.filter((k) => k.nama.toLowerCase() === nama.toLowerCase());
-    if (cocok.length) return cocok;
+    return cocok;
   }
   if (sesi.peran === "guru") {
     const dariJadwal = KELAS.filter((k) =>
       JADWAL.some((j) => j.kelasId === k.id && j.guru === sesi.nama),
     );
-    if (dariJadwal.length) return dariJadwal;
-    // Guru demo tanpa jadwal tercatat: tampilkan kelas ampuan contoh.
-    return KELAS.filter((k) => ["K4A", "K5A", "K6A"].includes(k.id));
+    return dariJadwal;
   }
   return KELAS;
 }
@@ -51,27 +50,22 @@ export function ujianById(id: string) {
   return UJIAN.find((u) => u.id === id) ?? null;
 }
 
-/** Status pengumpulan tugas per siswa (deterministik dari jumlah `dikumpulkan`). */
+/** Status pengumpulan tugas per siswa tersimpan di tabel assignment_submissions. */
 export function pengumpulanTugas(tugasId: string): BarisPengumpulan[] {
   const tugas = tugasById(tugasId);
   if (!tugas) return [];
   const daftar = SISWA.filter((s) => s.kelasId === tugas.kelasId);
-  const urutan = daftar
-    .map((s, i) => ({ s, skor: acak(i * 31 + tugas.id.length * 7, 1000) }))
-    .sort((a, b) => a.skor - b.skor);
-  const rasio = tugas.total > 0 ? tugas.dikumpulkan / tugas.total : 0;
-  const jumlahKumpul = Math.round(daftar.length * rasio);
-  const sudahSet = new Set(urutan.slice(0, jumlahKumpul).map((x) => x.s.id));
-
-  return daftar.map((s, i) => {
-    const sudah = sudahSet.has(s.id);
-    const terlambat = sudah && acak(i * 17 + 5, 10) < 2;
+  const indexed = new Map(
+    PENGUMPULAN_TUGAS.filter((r) => r.tugasId === tugasId).map((r) => [r.siswaId, r]),
+  );
+  return daftar.map((s) => {
+    const row = indexed.get(s.id);
     return {
       siswa: s,
-      sudah,
-      terlambat,
-      waktu: sudah ? `${tugas.tenggat} ${String(8 + acak(i * 13, 9)).padStart(2, "0")}:${String(acak(i * 7, 60)).padStart(2, "0")}` : null,
-      nilaiAwal: sudah ? 65 + acak(i * 23 + 9, 35) : null,
+      sudah: Boolean(row?.waktu),
+      terlambat: row?.terlambat ?? false,
+      waktu: row?.waktu ?? null,
+      nilaiAwal: row?.nilaiAwal ?? null,
     };
   });
 }

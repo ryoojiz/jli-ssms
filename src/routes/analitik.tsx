@@ -1,9 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AlertTriangle, Database, Download, Gauge, RefreshCw, ShieldCheck } from "lucide-react";
-import { useState } from "react";
+import { AlertTriangle, Database, Gauge, ShieldCheck } from "lucide-react";
 import {
-  Bar,
-  BarChart,
   CartesianGrid,
   Line,
   LineChart,
@@ -16,23 +13,14 @@ import {
 import { AppShell, PageHeader, StatusPill, nadaStatus } from "@/components/app-shell";
 import { TabelData } from "@/components/data-table";
 import { StatCard } from "@/components/stat-card";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TeacherKpiDemo } from "@/components/teacher-kpi-demo";
 import { PriorityUsageDashboard } from "@/components/priority-usage-dashboard";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   INGESTION,
   KPI_KATALOG,
   KUALITAS_DATA,
   LAPORAN_TERJADWAL,
-  PERBANDINGAN_SEKOLAH,
   TREN_KPI,
 } from "@/lib/demo-data";
 
@@ -42,13 +30,12 @@ export const Route = createFileRoute("/analitik")({
       { title: "Dashboard & Analytics — KPI Sekolah | SMS" },
       {
         name: "description",
-        content:
-          "Katalog KPI, tren lintas modul, perbandingan antar sekolah, monitoring kualitas data, dan laporan terjadwal untuk Kepala Sekolah dan Dinas.",
+        content: "KPI dan catatan analitik sekolah aktif untuk peninjauan internal.",
       },
       { property: "og:title", content: "Dashboard & Analytics — SMS Sekolah" },
       {
         property: "og:description",
-        content: "Single pane of glass KPI sekolah: akademik, kehadiran, keuangan, keamanan, IoT.",
+        content: "KPI dan catatan analitik untuk sekolah aktif.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -57,13 +44,7 @@ export const Route = createFileRoute("/analitik")({
   component: Analitik,
 });
 
-const PERIODE = ["Semester Berjalan", "Bulan Ini", "Minggu Ini", "Hari Ini"];
-const CAKUPAN = ["SDN 01 Kebagusan", "Seluruh Sekolah Binaan"];
-
 function Analitik() {
-  const [periode, setPeriode] = useState(PERIODE[0]!);
-  const [cakupan, setCakupan] = useState(CAKUPAN[0]!);
-
   const peringatan = KPI_KATALOG.filter((k) => k.status !== "Normal").length;
   const dqTemuan = KUALITAS_DATA.reduce((a, b) => a + b.temuan, 0);
   const totalEvent = INGESTION.reduce((a, b) => a + b.event, 0);
@@ -73,41 +54,16 @@ function Analitik() {
       <PageHeader
         judul="Dashboard & Analytics"
         deskripsi="Laporan penggunaan modul prioritas, KPI administrasi guru, dan analisis operasional sekolah."
-        aksi={
-          <>
-            <Select value={cakupan} onValueChange={setCakupan}>
-              <SelectTrigger className="w-56">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CAKUPAN.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={periode} onValueChange={setPeriode}>
-              <SelectTrigger className="w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PERIODE.map((p) => (
-                  <SelectItem key={p} value={p}>
-                    {p}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button variant="outline" disabled title="Ekspor belum tersedia">
-              <Download className="size-4" /> Ekspor belum tersedia
-            </Button>
-          </>
-        }
       />
 
       <PriorityUsageDashboard />
       <TeacherKpiDemo />
+
+      <p className="mt-6 rounded-md border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+        Indikator dan tren di bawah adalah catatan awal atau hasil impor untuk sekolah aktif. Bagian
+        ini belum dihitung ulang otomatis dari transaksi modul, berbeda dari laporan penggunaan di
+        atas.
+      </p>
 
       <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
@@ -136,11 +92,11 @@ function Analitik() {
         />
       </section>
 
-      <section className="mt-6 grid gap-4 lg:grid-cols-2">
+      <section className="mt-6">
         <Card className="p-5">
-          <h2 className="text-sm font-semibold text-foreground">Tren KPI utama</h2>
+          <h2 className="text-sm font-semibold text-foreground">Tren KPI tercatat</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Kehadiran & rata-rata nilai per periode — {periode}.
+            Kehadiran dan rata-rata nilai berdasarkan periode yang tersedia pada sekolah aktif.
           </p>
           <div className="mt-4 h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -167,59 +123,13 @@ function Analitik() {
             </ResponsiveContainer>
           </div>
         </Card>
-
-        <Card className="p-5">
-          <h2 className="text-sm font-semibold text-foreground">Perbandingan antar sekolah</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Hanya sekolah dalam cakupan pengguna yang ditampilkan.
-          </p>
-          <div className="mt-4 h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={PERBANDINGAN_SEKOLAH}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                <XAxis
-                  dataKey="sekolah"
-                  tick={{ fontSize: 10 }}
-                  interval={0}
-                  height={50}
-                  angle={-12}
-                  textAnchor="end"
-                />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Bar
-                  dataKey="kehadiran"
-                  name="Kehadiran (%)"
-                  fill="var(--color-primary)"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                  dataKey="serapan"
-                  name="Serapan anggaran (%)"
-                  fill="var(--color-info)"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
       </section>
 
       <div className="mt-6">
         <TabelData
           judul="Katalog KPI"
-          deskripsi="Daftar indikator sekolah dan status capaian."
+          deskripsi="Indikator dan status capaian yang tersimpan untuk sekolah aktif."
           data={KPI_KATALOG}
-          aksi={
-            <Button
-              variant="outline"
-              size="sm"
-              disabled
-              title="Pembaruan katalog belum tersedia"
-            >
-              <RefreshCw className="size-4" /> Refresh belum tersedia
-            </Button>
-          }
           kolom={[
             { judul: "ID", render: (k) => k.id },
             {
@@ -253,7 +163,7 @@ function Analitik() {
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <TabelData
           judul="Monitoring kualitas data"
-          deskripsi="Deteksi data hilang, duplikasi, dan outlier per sumber (FR-09)."
+          deskripsi="Hasil pemeriksaan kualitas data yang tersimpan, bukan pemindaian otomatis."
           data={KUALITAS_DATA}
           kolom={[
             { judul: "Sumber", render: (d) => <span className="font-medium">{d.sumber}</span> },
@@ -268,12 +178,16 @@ function Analitik() {
 
         <TabelData
           judul="Pipeline ingestion"
-          deskripsi="Aliran event dan batch dari seluruh modul serta platform IoT (FR-02)."
+          deskripsi="Status ingestion yang tersimpan; konektor eksternal belum diaktifkan."
           data={INGESTION}
           kolom={[
             { judul: "Sumber", render: (i) => <span className="font-medium">{i.sumber}</span> },
             { judul: "Metode", render: (i) => i.metode },
-            { judul: "Event 24 jam", kanan: true, render: (i) => i.event.toLocaleString("id-ID") },
+            {
+              judul: "Jumlah tercatat",
+              kanan: true,
+              render: (i) => i.event.toLocaleString("id-ID"),
+            },
             { judul: "Jeda", render: (i) => i.jeda },
             {
               judul: "Status",
@@ -286,7 +200,7 @@ function Analitik() {
       <div className="mt-6">
         <TabelData
           judul="Laporan terjadwal"
-          deskripsi="Distribusi laporan periodik ke penerima sesuai peran (FR-07, FR-08)."
+          deskripsi="Konfigurasi laporan tersimpan; pengiriman otomatis belum diaktifkan."
           data={LAPORAN_TERJADWAL}
           kolom={[
             { judul: "ID", render: (r) => r.id },
@@ -294,7 +208,7 @@ function Analitik() {
             { judul: "Format", render: (r) => r.format },
             { judul: "Jadwal", render: (r) => r.jadwal },
             { judul: "Penerima", render: (r) => r.penerima },
-            { judul: "Terakhir dikirim", render: (r) => r.terakhir },
+            { judul: "Catatan terakhir", render: (r) => r.terakhir },
             {
               judul: "Status",
               render: (r) => <StatusPill nada={nadaStatus(r.status)}>{r.status}</StatusPill>,

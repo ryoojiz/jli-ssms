@@ -1,8 +1,4 @@
-/**
- * Struktur peran (RBAC) sisi antarmuka.
- * Sementara memakai data demo; begitu Lovable Cloud aktif, PERAN & izin
- * dipetakan langsung ke tabel `user_roles` tanpa mengubah komponen UI.
- */
+/** Daftar peran untuk navigasi; otorisasi mutasi ditegakkan kembali di server. */
 
 export type Peran =
   | "kepala_sekolah"
@@ -141,85 +137,19 @@ export type Sesi = {
   peran: Peran;
   /** Konteks tambahan, mis. kelas wali kelas atau nama anak untuk wali murid. */
   konteks?: string;
-  /** ID anak terkait untuk akun wali murid/siswa pada data demo. */
+  /** ID siswa yang ditautkan ke akun wali murid/siswa. */
   siswaId?: string;
-  /** ID guru demo untuk atribusi aktivitas akademik; tidak dipakai sebagai autentikasi produksi. */
+  /** ID guru yang ditautkan ke keanggotaan sekolah. */
   guruId?: string;
+  classId?: string;
+  schoolId?: string;
+  schoolName?: string;
+  schoolNpsn?: string;
+  schoolAddress?: string;
+  academicYear?: string;
+  semester?: string;
+  schools?: Array<{ id: string; name: string }>;
 };
-
-/** Akun demo untuk mencoba tiap peran sebelum Lovable Cloud aktif. */
-export const AKUN_DEMO: Array<Sesi & { kataSandi: string }> = [
-  {
-    nama: "Yulia Kratiningsih S.Pd",
-    email: "kepsek@sdn01.sch.id",
-    peran: "kepala_sekolah",
-    kataSandi: "demo1234",
-  },
-  {
-    nama: "Rizky Ananda",
-    email: "operator@sdn01.sch.id",
-    peran: "operator",
-    kataSandi: "demo1234",
-  },
-  {
-    nama: "Larasati, S.Pd.",
-    email: "guru@sdn01.sch.id",
-    peran: "guru",
-    kataSandi: "demo1234",
-    konteks: "Bahasa Inggris",
-    guruId: "G10",
-  },
-  {
-    nama: "Siti Rohmah, S.Pd.",
-    email: "walikelas@sdn01.sch.id",
-    peran: "wali_kelas",
-    kataSandi: "demo1234",
-    konteks: "Kelas 5A",
-    guruId: "G06",
-  },
-  {
-    nama: "Hendra Kurniawan",
-    email: "bendahara@sdn01.sch.id",
-    peran: "bendahara",
-    kataSandi: "demo1234",
-  },
-  {
-    nama: "Maya Puspita",
-    email: "pustakawan@sdn01.sch.id",
-    peran: "pustakawan",
-    kataSandi: "demo1234",
-  },
-  { nama: "Agus Setiawan", email: "sarpras@sdn01.sch.id", peran: "sarpras", kataSandi: "demo1234" },
-  { nama: "Ns. Dewi Lestari", email: "uks@sdn01.sch.id", peran: "uks", kataSandi: "demo1234" },
-  {
-    nama: "Joko Prasetyo",
-    email: "keamanan@sdn01.sch.id",
-    peran: "keamanan",
-    kataSandi: "demo1234",
-  },
-  {
-    nama: "Ibu Ratna (Wali Aisyah)",
-    email: "walimurid@gmail.com",
-    peran: "walimurid",
-    kataSandi: "demo1234",
-    konteks: "Aisyah Putri — 5A",
-    siswaId: "K5A-S01",
-  },
-  {
-    nama: "Aisyah Putri",
-    email: "siswa@sdn01.sch.id",
-    peran: "siswa",
-    kataSandi: "demo1234",
-    konteks: "Kelas 5A",
-    siswaId: "K5A-S01",
-  },
-  {
-    nama: "Inspektorat Dinas",
-    email: "auditor@jakarta.go.id",
-    peran: "auditor",
-    kataSandi: "demo1234",
-  },
-];
 
 export function inisial(nama: string) {
   return nama

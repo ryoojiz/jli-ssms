@@ -25,7 +25,6 @@ import {
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
-import { SCHOOL } from "@/lib/demo-data";
 import { useAuth } from "@/lib/auth-context";
 import { PERAN_LABEL, inisial, type Modul } from "@/lib/rbac";
 import { cn } from "@/lib/utils";
@@ -102,7 +101,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         />
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold">Smart School Management System</p>
-          <p className="truncate text-xs text-sidebar-foreground/70">{SCHOOL.npsn} · Jakarta</p>
+          <p className="truncate text-xs text-sidebar-foreground/70">
+            {sesi?.schoolNpsn ?? "Sekolah Jakarta"}
+          </p>
         </div>
       </div>
 
@@ -145,8 +146,10 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
       <div className="flex items-center justify-between gap-3 border-t border-sidebar-border px-5 py-4 text-xs text-sidebar-foreground/70">
         <div className="min-w-0">
-          <p className="font-medium text-sidebar-foreground">{SCHOOL.tahunAjaran}</p>
-          <p>Semester {SCHOOL.semester}</p>
+          <p className="font-medium text-sidebar-foreground">
+            {sesi?.academicYear ?? "Tahun ajaran belum diatur"}
+          </p>
+          <p>Semester {sesi?.semester ?? "—"}</p>
         </div>
         <img
           src={logoJliAsset.url}
@@ -172,7 +175,7 @@ const MOBILE_NAV = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
-  const { sesi, siapMemuat, keluar, bolehAkses } = useAuth();
+  const { sesi, siapMemuat, keluar, pilihSekolah, bolehAkses } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const modul = MODUL_PATH[pathname];
@@ -260,9 +263,26 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Button>
 
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-foreground">{SCHOOL.nama}</p>
-              <p className="truncate text-xs text-muted-foreground">{SCHOOL.alamatSingkat}</p>
+              <p className="truncate text-sm font-semibold text-foreground">{sesi.schoolName}</p>
+              <p className="truncate text-xs text-muted-foreground">
+                {sesi.schoolAddress ?? "Sekolah aktif"}
+              </p>
             </div>
+
+            {(sesi.schools?.length ?? 0) > 1 ? (
+              <select
+                aria-label="Pilih sekolah aktif"
+                className="max-w-36 rounded-md border border-input bg-background px-2 py-2 text-xs sm:max-w-48"
+                value={sesi.schoolId}
+                onChange={(event) => void pilihSekolah(event.target.value)}
+              >
+                {sesi.schools?.map((school) => (
+                  <option key={school.id} value={school.id}>
+                    {school.name}
+                  </option>
+                ))}
+              </select>
+            ) : null}
 
             <div className="relative hidden w-52 shrink md:block xl:w-64">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
