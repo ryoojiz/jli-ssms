@@ -36,6 +36,7 @@ export const imporDataModul = createServerFn({ method: "POST" })
     const sid = sesi.schoolId!;
     const db = await mysqlPool().getConnection();
     const hasil: Record<string, number> = {};
+    let lokasi = "Persiapan impor";
     try {
       await db.beginTransaction();
       const batchId = randomUUID();
@@ -46,7 +47,8 @@ export const imporDataModul = createServerFn({ method: "POST" })
       for (const l of data.lembar) {
         if (!m.lembar.some((x) => x.nama === l.nama))
           throw new Error(`Sheet ${l.nama} tidak dikenal untuk modul ${m.id}.`);
-        for (const b of l.baris) {
+        for (const [index, b] of l.baris.entries()) {
+          lokasi = `${l.nama} baris ${index + 2}`;
           await db.execute(
             `INSERT INTO import_rows (school_id,module_name,sheet_name,row_key,data_json,batch_id,updated_at)
              VALUES (?,?,?,?,?,?,NOW(3)) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json),batch_id=VALUES(batch_id),updated_at=VALUES(updated_at)`,
@@ -64,7 +66,7 @@ export const imporDataModul = createServerFn({ method: "POST" })
       await db.commit();
     } catch (error) {
       await db.rollback();
-      throw error;
+      throw new Error(`${lokasi}: ${error instanceof Error ? error.message : "impor gagal."}`);
     } finally {
       db.release();
     }

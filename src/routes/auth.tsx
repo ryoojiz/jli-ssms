@@ -3,8 +3,7 @@ import { LogIn } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useAuth } from "@/lib/auth-context";
-import logoDkiAsset from "@/assets/logo-dki.png.asset.json";
-import logoJliAsset from "@/assets/logo-jli.png.asset.json";
+
 import welcomeDigitalSchool from "@/assets/welcome-digital-school.jpg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,8 +57,8 @@ function HalamanAuth() {
         <img
           src={welcomeDigitalSchool}
           alt="Siswa SD belajar menggunakan teknologi digital bersama guru"
-          width={1536}
-          height={1024}
+          width={1670}
+          height={942}
           className="absolute inset-0 size-full object-cover"
         />
         <div className="absolute inset-0 bg-sidebar/35" />
@@ -70,7 +69,7 @@ function HalamanAuth() {
           <div className="flex items-center justify-between gap-6">
             <div className="flex items-center gap-3">
               <img
-                src={logoDkiAsset.url}
+                src={"/public/images/Jakarta.svg"}
                 alt="Logo Pemerintah DKI Jakarta"
                 className="h-14 w-14 shrink-0 object-contain"
               />
@@ -91,7 +90,7 @@ function HalamanAuth() {
           <div>
             <div className="flex items-center gap-4">
               <img
-                src={logoJliAsset.url}
+                src={"/public/images/JLI.png"}
                 alt="Logo JLI"
                 className="h-11 w-32 shrink-0 object-contain"
               />
@@ -110,7 +109,7 @@ function HalamanAuth() {
         <div className="w-full max-w-md">
           <div className="mb-8 flex items-center gap-3 lg:hidden">
             <img
-              src={logoDkiAsset.url}
+              src={"/public/images/Jakarta.svg"}
               alt="Logo Pemerintah DKI Jakarta"
               className="h-12 w-12 shrink-0 object-contain"
             />
@@ -119,7 +118,7 @@ function HalamanAuth() {
               <p className="text-xs text-muted-foreground">Sekolah Negeri Jakarta</p>
             </div>
             <img
-              src={logoJliAsset.url}
+              src={"/public/images/JLI.png"}
               alt="Logo JLI"
               className="ml-auto h-9 w-20 shrink-0 object-contain object-right"
             />

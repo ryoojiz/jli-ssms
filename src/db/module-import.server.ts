@@ -19,6 +19,10 @@ const optional = (data: Cells, column: string, max = 500) => {
   if (text.length > max) throw new Error(`Kolom ${column} terlalu panjang.`);
   return text;
 };
+const optionalIsbn = (data: Cells) => {
+  const isbn = optional(data, "ISBN", 40);
+  return isbn && isbn !== "-" ? isbn : null;
+};
 const number = (data: Cells, column: string, min = 0, max = 1e15) => {
   const n = Number(data[column]);
   if (data[column] == null || !Number.isFinite(n) || n < min || n > max)
@@ -303,10 +307,10 @@ export async function persistModuleRow(
           school_id: sid,
           id: rowKey,
           asset_code: value(d, "Kode Barang", 80),
-          name: value(d, "Nama Barang", 200),
+          name: value(d, "Nama Barang", 300),
           category: value(d, "Kategori", 80),
-          location: value(d, "Lokasi/Ruang", 100),
-          condition_label: value(d, "Kondisi", 40),
+          location: optional(d, "Lokasi/Ruang", 100) ?? "Tidak diketahui",
+          condition_label: optional(d, "Kondisi", 40) ?? "Tidak diketahui",
           status: "Tercatat",
           purchase_value: number(d, "Harga Satuan (Rp)"),
           quantity: number(d, "Jumlah", 0, 1000000),
@@ -332,10 +336,10 @@ export async function persistModuleRow(
         {
           school_id: sid,
           id: bookId,
-          isbn: value(d, "ISBN", 40),
+          isbn: optionalIsbn(d),
           title: value(d, "Judul", 240),
-          author: value(d, "Pengarang", 160),
-          category: value(d, "Kategori", 80),
+          author: optional(d, "Pengarang", 160) ?? "Tidak diketahui",
+          category: optional(d, "Kategori", 80) ?? "Tidak diketahui",
           stock,
           available,
           publisher: optional(d, "Penerbit", 160),

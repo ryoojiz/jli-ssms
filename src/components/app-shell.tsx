@@ -1,6 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import logoDkiAsset from "@/assets/logo-dki.png.asset.json";
-import logoJliAsset from "@/assets/logo-jli.png.asset.json";
+
 import {
   BarChart3,
   BookOpen,
@@ -95,7 +94,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       <div className="pita-merah-putih h-1 w-full shrink-0" />
       <div className="flex items-center gap-3 px-5 py-5">
         <img
-          src={logoDkiAsset.url}
+          src={"/public/images/Jakarta.svg"}
           alt="Logo DKI Jakarta"
           className="size-10 shrink-0 object-contain"
         />
@@ -152,7 +151,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           <p>Semester {sesi?.semester ?? "—"}</p>
         </div>
         <img
-          src={logoJliAsset.url}
+          src={"/public/images/JLI.png"}
           alt="Logo JLI"
           className="h-9 w-20 shrink-0 object-contain object-right"
         />
@@ -291,7 +290,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
             <div className="flex shrink-0 items-center gap-1.5">
               <img
-                src={logoJliAsset.url}
+                src={"/public/images/JLI.png"}
                 alt="Logo JLI"
                 className="h-8 w-12 shrink-0 object-contain object-right lg:hidden"
               />

@@ -5,19 +5,26 @@ import type { RowDataPacket } from "mysql2";
 const classKey = (value: string) =>
   value.toUpperCase().startsWith("K") ? value.toUpperCase() : `K${value.toUpperCase()}`;
 const studentKey = (nisn: string) => `DB-${nisn}`;
+const sexCode = (value: string | null | undefined) => {
+  if (!value) return null;
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "l" || normalized === "laki-laki") return "L";
+  if (normalized === "p" || normalized === "perempuan") return "P";
+  throw new Error(`Jenis kelamin ${value} tidak dikenal. Gunakan L/P atau Laki-laki/Perempuan.`);
+};
 
 const teks = (max = 200) => z.string().trim().max(max).nullable().optional();
 
 const GuruSchema = z.object({
   nip: z.string().trim().min(1).max(40),
   nama: z.string().trim().min(1).max(150),
-  jenis_kelamin: teks(2),
+  jenis_kelamin: teks(20),
   jabatan: teks(),
   mapel: teks(),
   wali_kelas: teks(10),
   telp: teks(30),
   email: teks(150),
-  status: teks(20),
+  status: teks(32),
 });
 const KelasSchema = z.object({
   id: z.string().trim().min(1).max(10),
@@ -31,7 +38,7 @@ const SiswaSchema = z.object({
   nisn: z.string().trim().min(1).max(20),
   nis: teks(20),
   nama: z.string().trim().min(1).max(150),
-  jenis_kelamin: teks(2),
+  jenis_kelamin: teks(20),
   tanggal_lahir: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -71,9 +78,11 @@ export const imporDataSekolah = createServerFn({ method: "POST" })
     const schoolId = sesi.schoolId!;
     const db = await mysqlPool().getConnection();
     const hasil = { guru: 0, kelas: 0, siswa: 0, kehadiran: 0 };
+    let lokasi = "Persiapan impor";
     try {
       await db.beginTransaction();
-      for (const g of data.guru) {
+      for (const [index, g] of data.guru.entries()) {
+        lokasi = `Guru baris ${index + 2}`;
         await db.execute(
           `INSERT INTO teachers (school_id,id,nip,name,sex,position,subject,homeroom_class,phone,email,employment_status)
            VALUES (?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE name=VALUES(name),sex=VALUES(sex),position=VALUES(position),subject=VALUES(subject),homeroom_class=VALUES(homeroom_class),phone=VALUES(phone),email=VALUES(email),employment_status=VALUES(employment_status)`,
@@ -82,7 +91,7 @@ export const imporDataSekolah = createServerFn({ method: "POST" })
             `DB-${g.nip}`,
             g.nip,
             g.nama,
-            g.jenis_kelamin ?? null,
+            sexCode(g.jenis_kelamin),
             g.jabatan ?? null,
             g.mapel ?? null,
             g.wali_kelas ?? null,
@@ -93,7 +102,8 @@ export const imporDataSekolah = createServerFn({ method: "POST" })
         );
       }
       hasil.guru = data.guru.length;
-      for (const k of data.kelas) {
+      for (const [index, k] of data.kelas.entries()) {
+        lokasi = `Kelas baris ${index + 2}`;
         const id = classKey(k.id);
         const [teacherRows] = k.nip_wali
           ? await db.execute<RowDataPacket[]>(
@@ -118,7 +128,8 @@ export const imporDataSekolah = createServerFn({ method: "POST" })
         );
       }
       hasil.kelas = data.kelas.length;
-      for (const s of data.siswa) {
+      for (const [index, s] of data.siswa.entries()) {
+        lokasi = `Siswa & Wali baris ${index + 2}`;
         const [existing] = await db.execute<RowDataPacket[]>(
           "SELECT id FROM students WHERE school_id=? AND nisn=? FOR UPDATE",
           [schoolId, s.nisn],
@@ -133,7 +144,7 @@ export const imporDataSekolah = createServerFn({ method: "POST" })
             s.nisn,
             s.nis ?? null,
             s.nama,
-            s.jenis_kelamin ?? null,
+            sexCode(s.jenis_kelamin),
             s.tanggal_lahir ?? null,
             classKey(s.kelas_id),
             s.alamat ?? null,
@@ -146,7 +157,8 @@ export const imporDataSekolah = createServerFn({ method: "POST" })
         );
       }
       hasil.siswa = data.siswa.length;
-      for (const h of data.kehadiran) {
+      for (const [index, h] of data.kehadiran.entries()) {
+        lokasi = `Kehadiran baris ${index + 2}`;
         const [studentRows] = await db.execute<RowDataPacket[]>(
           "SELECT id,class_id FROM students WHERE school_id=? AND nisn=?",
           [schoolId, h.nisn],
@@ -178,7 +190,7 @@ export const imporDataSekolah = createServerFn({ method: "POST" })
       await db.commit();
     } catch (error) {
       await db.rollback();
-      throw error;
+      throw new Error(`${lokasi}: ${error instanceof Error ? error.message : "impor gagal."}`);
     } finally {
       db.release();
     }

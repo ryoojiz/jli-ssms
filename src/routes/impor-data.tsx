@@ -114,7 +114,7 @@ function ImporData() {
       setData(null);
     } catch (e) {
       console.error(e);
-      setPesan({ ok: false, teks: "Gagal menyimpan. Periksa isian file lalu coba lagi." });
+      setPesan({ ok: false, teks: e instanceof Error ? e.message : "Gagal menyimpan data." });
     } finally {
       setProses(false);
     }
