@@ -11,7 +11,7 @@ const directory = join(process.cwd(), "database", "mysql", "migrations");
 const lockName = "jli_ssms_mysql_migrations";
 
 async function applyStatement(statement: string) {
-  const alter = /^ALTER TABLE (\w+) (.+)$/is.exec(statement);
+  const alter = /^ALTER TABLE\s+(\w+)\s+([\s\S]+)$/i.exec(statement);
   if (alter) {
     const table = alter[1]!;
     const columns = [...alter[2]!.matchAll(/ADD COLUMN (\w+)/gi)].map((match) => match[1]!);
