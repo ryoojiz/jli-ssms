@@ -180,7 +180,7 @@ function HalamanSelamatDatang() {
                 </Button>
               </div>
 
-              <dl className="mt-10 grid max-w-xl grid-cols-3 divide-x divide-border border-y border-border py-4 font-data">
+              {/* <dl className="mt-10 grid max-w-xl grid-cols-3 divide-x divide-border border-y border-border py-4 font-data">
                 <div className="pr-3">
                   <dd className="text-xl font-semibold tabular-nums text-foreground">
                     {SEMUA_MODUL.length}
@@ -197,19 +197,13 @@ function HalamanSelamatDatang() {
                     peran pengguna
                   </dt>
                 </div>
-                <div className="pl-3">
-                  <dd className="text-xl font-semibold text-foreground">RBAC</dd>
-                  <dt className="mt-0.5 text-[11px] leading-4 text-muted-foreground">
-                    izin per modul
-                  </dt>
-                </div>
-              </dl>
+              </dl> */}
             </div>
           </div>
         </section>
 
         <section id="cakupan" className="border-t border-border py-12">
-          <div className="max-w-3xl">
+          <div className="max-w-2xl">
             <div className="rounded-lg border border-border bg-card">
               <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
                 <p className="font-data text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
@@ -344,7 +338,7 @@ function HalamanSelamatDatang() {
         </section>
       </main>
 
-      <footer className="border-t border-border bg-card">
+      <footer className="border-t border-border bg-primary">
         <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-4 px-4 py-6 md:px-8">
           <div className="flex items-center gap-3">
             <img
@@ -358,7 +352,7 @@ function HalamanSelamatDatang() {
               className="h-7 w-24 object-contain object-left"
             />
           </div>
-          <p className="font-data text-[11px] text-muted-foreground">
+          <p className="font-data text-[11px] text-white/50">
             Smart School Management System · Sekolah Negeri Jakarta
           </p>
         </div>

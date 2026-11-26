@@ -92,15 +92,9 @@ function HalamanAuth() {
               <img
                 src={"/images/JLI.png"}
                 alt="Logo JLI"
-                className="h-11 w-32 shrink-0 object-contain"
+                className="h-16 w-32 shrink-0 object-contain"
               />
-              <p className="max-w-sm text-xs font-medium leading-5 text-sidebar-foreground/85">
-                Satu Platform, Satu Data dan Satu Ekosistem Jakarta Lebih baik untuk Indonesia
-              </p>
             </div>
-            <p className="mt-2 text-xs text-sidebar-foreground/70">
-              Sekolah Negeri Jakarta · Zona Asia/Jakarta
-            </p>
           </div>
         </div>
       </section>
