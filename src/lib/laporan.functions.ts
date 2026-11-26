@@ -32,7 +32,7 @@ export const analisisLaporanSekolah = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => MasukanLaporan.parse(input))
   .handler(async ({ data }): Promise<HasilAnalisisLaporan> => {
     const { requireIdentity } = await import("@/db/auth.server");
-    await requireIdentity(["kepala_sekolah", "operator", "auditor", "bendahara"]);
+    await requireIdentity(["kepala_sekolah", "operator", "auditor", "pusat", "bendahara"]);
     const key = process.env["LOVABLE_API_KEY"];
     if (!key) throw new Error("Layanan AI belum tersedia (kunci API tidak ditemukan).");
 

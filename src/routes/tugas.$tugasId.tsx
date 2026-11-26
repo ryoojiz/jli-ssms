@@ -17,8 +17,7 @@ export const Route = createFileRoute("/tugas/$tugasId")({
       { title: "Penilaian Tugas — Progres & Nilai Siswa | SMS" },
       {
         name: "description",
-        content:
-          "Pantau pengumpulan tugas dan rincian nilai siswa dalam satu halaman.",
+        content: "Pantau pengumpulan tugas dan rincian nilai siswa dalam satu halaman.",
       },
       { property: "og:title", content: "Penilaian Tugas — SMS Sekolah" },
       {
@@ -42,7 +41,7 @@ function PenilaianTugas() {
 
   if (
     !sesi ||
-    !["guru", "wali_kelas", "operator", "kepala_sekolah", "auditor"].includes(sesi.peran)
+    !["guru", "wali_kelas", "operator", "kepala_sekolah", "auditor", "pusat"].includes(sesi.peran)
   ) {
     return (
       <AppShell>

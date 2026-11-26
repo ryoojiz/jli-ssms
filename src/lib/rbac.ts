@@ -12,7 +12,8 @@ export type Peran =
   | "keamanan"
   | "walimurid"
   | "siswa"
-  | "auditor";
+  | "auditor"
+  | "pusat";
 
 /** Kunci modul = izin baca modul terkait. */
 export type Modul =
@@ -29,7 +30,8 @@ export type Modul =
   | "keamanan"
   | "kelas-digital"
   | "laporan"
-  | "master-data";
+  | "master-data"
+  | "pusat";
 
 export const SEMUA_MODUL: Modul[] = [
   "beranda",
@@ -61,6 +63,7 @@ export const PERAN_LABEL: Record<Peran, string> = {
   walimurid: "Wali Murid",
   siswa: "Siswa",
   auditor: "Auditor (baca saja)",
+  pusat: "Administrator Pusat (Dinas Pendidikan)",
 };
 
 export const PERAN_DESKRIPSI: Record<Peran, string> = {
@@ -76,6 +79,7 @@ export const PERAN_DESKRIPSI: Record<Peran, string> = {
   walimurid: "Melihat data anak: akademik, kehadiran, kesehatan, pengumuman.",
   siswa: "Melihat jadwal, tugas, nilai, materi, dan kuis pribadi.",
   auditor: "Akses baca saja seluruh modul termasuk audit trail.",
+  pusat: "Akses baca saja seluruh sekolah; dashboard gabungan dan drilldown per sekolah.",
 };
 
 /** Izin baca per peran (menu yang tampil di sidebar). */
@@ -83,6 +87,7 @@ export const IZIN: Record<Peran, Modul[]> = {
   kepala_sekolah: SEMUA_MODUL,
   operator: SEMUA_MODUL,
   auditor: SEMUA_MODUL,
+  pusat: [...SEMUA_MODUL, "pusat"],
   guru: [
     "beranda",
     "lokasi",
@@ -121,7 +126,13 @@ export const IZIN: Record<Peran, Modul[]> = {
 };
 
 /** Peran yang boleh melakukan perubahan data (tulis) pada modul yang diizinkan. */
-export const PERAN_HANYA_BACA: Peran[] = ["auditor", "walimurid", "siswa", "kepala_sekolah"];
+export const PERAN_HANYA_BACA: Peran[] = [
+  "auditor",
+  "pusat",
+  "walimurid",
+  "siswa",
+  "kepala_sekolah",
+];
 
 export function bolehAkses(peran: Peran, modul: Modul) {
   return IZIN[peran].includes(modul);

@@ -41,7 +41,7 @@ export function LibraryBookingDemo() {
   const classes = KELAS.filter((k) => canBookClass(sesi, k.id));
   const bookings = state.bookings.filter(
     (b) =>
-      ["pustakawan", "operator", "kepala_sekolah", "auditor"].includes(sesi.peran) ||
+      ["pustakawan", "operator", "kepala_sekolah", "auditor", "pusat"].includes(sesi.peran) ||
       b.createdBy === sesi.email.toLowerCase(),
   );
   return (

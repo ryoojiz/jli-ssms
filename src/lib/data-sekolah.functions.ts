@@ -200,7 +200,7 @@ export const imporDataSekolah = createServerFn({ method: "POST" })
 export const ambilDataSekolah = createServerFn({ method: "GET" }).handler(async () => {
   const { requireIdentity } = await import("@/db/auth.server");
   const { mysqlPool } = await import("@/db/mysql.server");
-  const { sesi } = await requireIdentity(["operator", "kepala_sekolah", "auditor"]);
+  const { sesi } = await requireIdentity(["operator", "kepala_sekolah", "auditor", "pusat"]);
   const sid = sesi.schoolId!;
   const [g] = await mysqlPool().query(
     "SELECT nip,name AS nama,subject AS mapel,employment_status AS status,homeroom_class AS wali_kelas FROM teachers WHERE school_id=? AND id LIKE 'DB-%'",

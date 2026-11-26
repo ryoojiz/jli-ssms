@@ -4,6 +4,7 @@ import {
   BarChart3,
   BookOpen,
   Boxes,
+  Building2,
   CalendarCheck,
   FileText,
   GraduationCap,
@@ -29,12 +30,14 @@ import { PERAN_LABEL, inisial, type Modul } from "@/lib/rbac";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 
 const NAV = [
   {
     grup: "Pusat Kendali",
     item: [
       { to: "/", modul: "beranda", label: "Command Center", icon: LayoutDashboard },
+      { to: "/pusat", modul: "pusat", label: "Dashboard Pusat", icon: Building2 },
       { to: "/lokasi", modul: "lokasi", label: "Lokasi Sekolah", icon: MapPinned },
       { to: "/analitik", modul: "analitik", label: "Dashboard & Analytics", icon: BarChart3 },
       { to: "/laporan", modul: "laporan", label: "Analisis Laporan (AI)", icon: FileText },
@@ -94,7 +97,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       <div className="pita-merah-putih h-1 w-full shrink-0" />
       <div className="flex items-center gap-3 px-5 py-5">
         <img
-          src={"/public/images/Jakarta.svg"}
+          src={"/images/Jakarta.svg"}
           alt="Logo DKI Jakarta"
           className="size-10 shrink-0 object-contain"
         />
@@ -151,7 +154,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           <p>Semester {sesi?.semester ?? "—"}</p>
         </div>
         <img
-          src={"/public/images/JLI.png"}
+          src={"/images/JLI.png"}
           alt="Logo JLI"
           className="h-9 w-20 shrink-0 object-contain object-right"
         />
@@ -177,7 +180,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { sesi, siapMemuat, keluar, pilihSekolah, bolehAkses } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const modul = MODUL_PATH[pathname];
+  const modul = pathname.startsWith("/pusat") ? "pusat" : MODUL_PATH[pathname];
   const ruteGuru =
     pathname === "/siswa-saya" || pathname.startsWith("/tugas/") || pathname.startsWith("/ujian/");
   const labelMobileWali: Partial<Record<Modul, string>> = {
@@ -187,13 +190,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    if (siapMemuat && !sesi) navigate({ to: "/auth", replace: true });
+    if (siapMemuat && !sesi) navigate({ to: "/selamat-datang", replace: true });
   }, [siapMemuat, sesi, navigate]);
 
   if (!siapMemuat || !sesi) {
     return (
       <div className="grid min-h-screen place-items-center bg-background">
-        <p className="text-sm text-muted-foreground">Memeriksa sesi…</p>
+        <Spinner />
+        {/* <p className="text-sm text-muted-foreground">Memeriksa sesi…</p> */}
       </div>
     );
   }
@@ -262,9 +266,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Button>
 
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-foreground">{sesi.schoolName}</p>
+              <p className="truncate text-sm font-semibold text-foreground">
+                {sesi.peran === "pusat" ? "Dinas Pendidikan · Seluruh Sekolah" : sesi.schoolName}
+              </p>
               <p className="truncate text-xs text-muted-foreground">
-                {sesi.schoolAddress ?? "Sekolah aktif"}
+                {sesi.peran === "pusat"
+                  ? "Dashboard gabungan & drilldown sekolah"
+                  : (sesi.schoolAddress ?? "Sekolah aktif")}
               </p>
             </div>
 
@@ -290,7 +298,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
             <div className="flex shrink-0 items-center gap-1.5">
               <img
-                src={"/public/images/JLI.png"}
+                src={"/images/JLI.png"}
                 alt="Logo JLI"
                 className="h-8 w-12 shrink-0 object-contain object-right lg:hidden"
               />

@@ -19,7 +19,8 @@ export function TeacherKpiDemo() {
     [sesi?.academicYear, sesi?.semester].filter(Boolean).join(" "),
   );
   const [drafts, setDrafts] = useState<Record<string, string>>({});
-  if (!sesi || !["kepala_sekolah", "operator", "auditor"].includes(sesi.peran)) return null;
+  if (!sesi || !["kepala_sekolah", "operator", "auditor", "pusat"].includes(sesi.peran))
+    return null;
   return (
     <Card className="mt-6 p-5">
       <h2 className="font-semibold">KPI administrasi penilaian guru</h2>

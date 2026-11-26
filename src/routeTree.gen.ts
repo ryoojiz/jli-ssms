@@ -26,7 +26,11 @@ import { Route as LaporanRouteImport } from './routes/laporan'
 import { Route as LokasiRouteImport } from './routes/lokasi'
 import { Route as MasterDataRouteImport } from './routes/master-data'
 import { Route as PerpustakaanRouteImport } from './routes/perpustakaan'
+import { Route as PusatRouteRouteImport } from './routes/pusat/route'
+import { Route as SelamatDatangRouteImport } from './routes/selamat-datang'
 import { Route as SiswaSayaRouteImport } from './routes/siswa-saya'
+import { Route as PusatIndexRouteImport } from './routes/pusat/index'
+import { Route as PusatSchoolIdRouteImport } from './routes/pusat/$schoolId'
 import { Route as TugasTugasIdRouteImport } from './routes/tugas.$tugasId'
 import { Route as UjianUjianIdRouteImport } from './routes/ujian.$ujianId'
 
@@ -115,10 +119,30 @@ const PerpustakaanRoute = PerpustakaanRouteImport.update({
   path: '/perpustakaan',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PusatRouteRoute = PusatRouteRouteImport.update({
+  id: '/pusat',
+  path: '/pusat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SelamatDatangRoute = SelamatDatangRouteImport.update({
+  id: '/selamat-datang',
+  path: '/selamat-datang',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SiswaSayaRoute = SiswaSayaRouteImport.update({
   id: '/siswa-saya',
   path: '/siswa-saya',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PusatIndexRoute = PusatIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PusatRouteRoute,
+} as any)
+const PusatSchoolIdRoute = PusatSchoolIdRouteImport.update({
+  id: '/$schoolId',
+  path: '/$schoolId',
+  getParentRoute: () => PusatRouteRoute,
 } as any)
 const TugasTugasIdRoute = TugasTugasIdRouteImport.update({
   id: '/tugas/$tugasId',
@@ -133,6 +157,7 @@ const UjianUjianIdRoute = UjianUjianIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/pusat': typeof PusatRouteRouteWithChildren
   '/akademik': typeof AkademikRoute
   '/analitik': typeof AnalitikRoute
   '/auth': typeof AuthRoute
@@ -149,9 +174,12 @@ export interface FileRoutesByFullPath {
   '/lokasi': typeof LokasiRoute
   '/master-data': typeof MasterDataRoute
   '/perpustakaan': typeof PerpustakaanRoute
+  '/selamat-datang': typeof SelamatDatangRoute
   '/siswa-saya': typeof SiswaSayaRoute
+  '/pusat/$schoolId': typeof PusatSchoolIdRoute
   '/tugas/$tugasId': typeof TugasTugasIdRoute
   '/ujian/$ujianId': typeof UjianUjianIdRoute
+  '/pusat/': typeof PusatIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -171,13 +199,17 @@ export interface FileRoutesByTo {
   '/lokasi': typeof LokasiRoute
   '/master-data': typeof MasterDataRoute
   '/perpustakaan': typeof PerpustakaanRoute
+  '/selamat-datang': typeof SelamatDatangRoute
   '/siswa-saya': typeof SiswaSayaRoute
+  '/pusat/$schoolId': typeof PusatSchoolIdRoute
   '/tugas/$tugasId': typeof TugasTugasIdRoute
   '/ujian/$ujianId': typeof UjianUjianIdRoute
+  '/pusat': typeof PusatIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/pusat': typeof PusatRouteRouteWithChildren
   '/akademik': typeof AkademikRoute
   '/analitik': typeof AnalitikRoute
   '/auth': typeof AuthRoute
@@ -194,14 +226,18 @@ export interface FileRoutesById {
   '/lokasi': typeof LokasiRoute
   '/master-data': typeof MasterDataRoute
   '/perpustakaan': typeof PerpustakaanRoute
+  '/selamat-datang': typeof SelamatDatangRoute
   '/siswa-saya': typeof SiswaSayaRoute
+  '/pusat/$schoolId': typeof PusatSchoolIdRoute
   '/tugas/$tugasId': typeof TugasTugasIdRoute
   '/ujian/$ujianId': typeof UjianUjianIdRoute
+  '/pusat/': typeof PusatIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/pusat'
     | '/akademik'
     | '/analitik'
     | '/auth'
@@ -218,9 +254,12 @@ export interface FileRouteTypes {
     | '/lokasi'
     | '/master-data'
     | '/perpustakaan'
+    | '/selamat-datang'
     | '/siswa-saya'
+    | '/pusat/$schoolId'
     | '/tugas/$tugasId'
     | '/ujian/$ujianId'
+    | '/pusat/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -240,12 +279,16 @@ export interface FileRouteTypes {
     | '/lokasi'
     | '/master-data'
     | '/perpustakaan'
+    | '/selamat-datang'
     | '/siswa-saya'
+    | '/pusat/$schoolId'
     | '/tugas/$tugasId'
     | '/ujian/$ujianId'
+    | '/pusat'
   id:
     | '__root__'
     | '/'
+    | '/pusat'
     | '/akademik'
     | '/analitik'
     | '/auth'
@@ -262,13 +305,17 @@ export interface FileRouteTypes {
     | '/lokasi'
     | '/master-data'
     | '/perpustakaan'
+    | '/selamat-datang'
     | '/siswa-saya'
+    | '/pusat/$schoolId'
     | '/tugas/$tugasId'
     | '/ujian/$ujianId'
+    | '/pusat/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PusatRouteRoute: typeof PusatRouteRouteWithChildren
   AkademikRoute: typeof AkademikRoute
   AnalitikRoute: typeof AnalitikRoute
   AuthRoute: typeof AuthRoute
@@ -285,6 +332,7 @@ export interface RootRouteChildren {
   LokasiRoute: typeof LokasiRoute
   MasterDataRoute: typeof MasterDataRoute
   PerpustakaanRoute: typeof PerpustakaanRoute
+  SelamatDatangRoute: typeof SelamatDatangRoute
   SiswaSayaRoute: typeof SiswaSayaRoute
   TugasTugasIdRoute: typeof TugasTugasIdRoute
   UjianUjianIdRoute: typeof UjianUjianIdRoute
@@ -411,12 +459,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PerpustakaanRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pusat': {
+      id: '/pusat'
+      path: '/pusat'
+      fullPath: '/pusat'
+      preLoaderRoute: typeof PusatRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/selamat-datang': {
+      id: '/selamat-datang'
+      path: '/selamat-datang'
+      fullPath: '/selamat-datang'
+      preLoaderRoute: typeof SelamatDatangRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/siswa-saya': {
       id: '/siswa-saya'
       path: '/siswa-saya'
       fullPath: '/siswa-saya'
       preLoaderRoute: typeof SiswaSayaRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/pusat/': {
+      id: '/pusat/'
+      path: '/'
+      fullPath: '/pusat/'
+      preLoaderRoute: typeof PusatIndexRouteImport
+      parentRoute: typeof PusatRouteRoute
+    }
+    '/pusat/$schoolId': {
+      id: '/pusat/$schoolId'
+      path: '/$schoolId'
+      fullPath: '/pusat/$schoolId'
+      preLoaderRoute: typeof PusatSchoolIdRouteImport
+      parentRoute: typeof PusatRouteRoute
     }
     '/tugas/$tugasId': {
       id: '/tugas/$tugasId'
@@ -435,8 +511,23 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface PusatRouteRouteChildren {
+  PusatSchoolIdRoute: typeof PusatSchoolIdRoute
+  PusatIndexRoute: typeof PusatIndexRoute
+}
+
+const PusatRouteRouteChildren: PusatRouteRouteChildren = {
+  PusatSchoolIdRoute: PusatSchoolIdRoute,
+  PusatIndexRoute: PusatIndexRoute,
+}
+
+const PusatRouteRouteWithChildren = PusatRouteRoute._addFileChildren(
+  PusatRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PusatRouteRoute: PusatRouteRouteWithChildren,
   AkademikRoute: AkademikRoute,
   AnalitikRoute: AnalitikRoute,
   AuthRoute: AuthRoute,
@@ -453,6 +544,7 @@ const rootRouteChildren: RootRouteChildren = {
   LokasiRoute: LokasiRoute,
   MasterDataRoute: MasterDataRoute,
   PerpustakaanRoute: PerpustakaanRoute,
+  SelamatDatangRoute: SelamatDatangRoute,
   SiswaSayaRoute: SiswaSayaRoute,
   TugasTugasIdRoute: TugasTugasIdRoute,
   UjianUjianIdRoute: UjianUjianIdRoute,

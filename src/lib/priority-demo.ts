@@ -227,7 +227,7 @@ export function stockBalance(snapshot: PriorityState, itemId: string) {
   return snapshot.movements.filter((m) => m.itemId === itemId).reduce((sum, m) => sum + m.delta, 0);
 }
 const staff = (actor: Sesi) =>
-  !["siswa", "walimurid", "auditor", "kepala_sekolah"].includes(actor.peran);
+  !["siswa", "walimurid", "auditor", "pusat", "kepala_sekolah"].includes(actor.peran);
 
 export function addStockItem(actor: Sesi, name: string, unit: string, location: string) {
   if (actor.peran !== "operator") fail("Hanya operator yang mengelola katalog gudang.");

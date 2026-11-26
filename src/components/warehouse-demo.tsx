@@ -43,7 +43,7 @@ export function WarehouseDemo() {
     state.items.find((i) => i.id === id)?.name ?? "Barang tidak ditemukan";
   const visibleRequests = state.requests.filter(
     (r) =>
-      ["operator", "sarpras", "kepala_sekolah", "auditor"].includes(sesi?.peran ?? "") ||
+      ["operator", "sarpras", "kepala_sekolah", "auditor", "pusat"].includes(sesi?.peran ?? "") ||
       r.createdBy === sesi?.email.toLowerCase(),
   );
   if (!sesi) return null;
@@ -164,7 +164,9 @@ export function WarehouseDemo() {
               <Input id="stock-note" value={note} onChange={(e) => setNote(e.target.value)} />
             </div>
             <div className="flex flex-wrap items-end gap-2">
-              {!["siswa", "walimurid", "auditor", "kepala_sekolah"].includes(sesi.peran) && (
+              {!["siswa", "walimurid", "auditor", "pusat", "kepala_sekolah"].includes(
+                sesi.peran,
+              ) && (
                 <Button
                   onClick={() =>
                     run(async () => {
@@ -262,7 +264,7 @@ export function WarehouseDemo() {
         )}
       </Card>
 
-      {["sarpras", "operator", "kepala_sekolah", "auditor"].includes(sesi.peran) && (
+      {["sarpras", "operator", "kepala_sekolah", "auditor", "pusat"].includes(sesi.peran) && (
         <Card className="p-5">
           <h2 className="font-semibold">Stock opname</h2>
           {sesi.peran === "sarpras" && state.items.length > 0 && (

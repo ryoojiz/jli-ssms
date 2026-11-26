@@ -68,6 +68,7 @@
   --color-select-highlight: var(--select-highlight);
   --color-select-highlight-foreground: var(--select-highlight-foreground);
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-data: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
@@ -167,7 +168,10 @@
     font-family: var(--font-sans);
   }
 
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     letter-spacing: -0.015em;
   }
 
@@ -178,9 +182,5 @@
 
 /* Pita merah-putih khas dokumen resmi sekolah */
 @utility pita-merah-putih {
-  background-image: linear-gradient(
-    to right,
-    var(--color-primary) 0 50%,
-    oklch(0.995 0 0) 50% 100%
-  );
+  background-color: var(--color-primary);
 }

@@ -50,7 +50,7 @@ export const getSchoolSnapshot = createServerFn({ method: "GET" }).handler(async
   const { userId, sesi } = await requireIdentity();
   const sid = sesi.schoolId!;
   const role = sesi.peran;
-  const broad = ["operator", "kepala_sekolah", "auditor"].includes(role);
+  const broad = ["operator", "kepala_sekolah", "auditor", "pusat"].includes(role);
   const teacher = ["guru", "wali_kelas"].includes(role);
   const child = ["walimurid", "siswa"].includes(role);
   const rows = async (sql: string, params: Array<string | number> = []) =>
@@ -140,30 +140,49 @@ export const getSchoolSnapshot = createServerFn({ method: "GET" }).handler(async
       );
     else if (["KELAS", "MAPEL", "BUKU"].includes(key)) results[key] = await schoolRows(table);
     else if (["ANGGARAN", "TRANSAKSI", "ARUS_KAS"].includes(key))
-      results[key] = ["bendahara", "operator", "kepala_sekolah", "auditor"].includes(role)
+      results[key] = ["bendahara", "operator", "kepala_sekolah", "auditor", "pusat"].includes(role)
         ? await schoolRows(table)
         : [];
     else if (["ASET", "PEMINJAMAN_ASET", "MAINTENANCE"].includes(key))
-      results[key] = ["sarpras", "bendahara", "operator", "kepala_sekolah", "auditor"].includes(
-        role,
-      )
+      results[key] = [
+        "sarpras",
+        "bendahara",
+        "operator",
+        "kepala_sekolah",
+        "auditor",
+        "pusat",
+      ].includes(role)
         ? await schoolRows(table)
         : [];
     else if (key === "SIRKULASI")
-      results[key] = ["pustakawan", "operator", "kepala_sekolah", "auditor"].includes(role)
+      results[key] = ["pustakawan", "operator", "kepala_sekolah", "auditor", "pusat"].includes(role)
         ? await schoolRows(table)
         : [];
     else if (key === "KUNJUNGAN_UKS")
-      results[key] = ["uks", "operator", "kepala_sekolah", "auditor"].includes(role)
+      results[key] = ["uks", "operator", "kepala_sekolah", "auditor", "pusat"].includes(role)
         ? await schoolRows(table)
         : [];
     else if (["ANTROPOMETRI", "SCREENING"].includes(key))
-      results[key] = ["uks", "operator", "kepala_sekolah", "auditor", "wali_kelas"].includes(role)
+      results[key] = [
+        "uks",
+        "operator",
+        "kepala_sekolah",
+        "auditor",
+        "pusat",
+        "wali_kelas",
+      ].includes(role)
         ? await schoolRows(table)
         : [];
     else if (key === "NOTIFIKASI") results[key] = broad ? await schoolRows(table) : [];
     else if (["TAMU", "INSIDEN", "PERANGKAT"].includes(key))
-      results[key] = ["keamanan", "sarpras", "operator", "kepala_sekolah", "auditor"].includes(role)
+      results[key] = [
+        "keamanan",
+        "sarpras",
+        "operator",
+        "kepala_sekolah",
+        "auditor",
+        "pusat",
+      ].includes(role)
         ? await schoolRows(table)
         : [];
     else if (key === "AUDIT_LOG") results[key] = broad ? await schoolRows(table) : [];

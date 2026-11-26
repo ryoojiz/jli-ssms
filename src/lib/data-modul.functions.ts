@@ -78,7 +78,7 @@ export const ambilDataModul = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const { requireIdentity } = await import("@/db/auth.server");
     const { mysqlPool } = await import("@/db/mysql.server");
-    const { sesi } = await requireIdentity(["operator", "kepala_sekolah", "auditor"]);
+    const { sesi } = await requireIdentity(["operator", "kepala_sekolah", "auditor", "pusat"]);
     const [rows] = await mysqlPool().execute(
       "SELECT sheet_name AS lembar,row_key AS kunci,data_json AS data,updated_at FROM import_rows WHERE school_id=? AND module_name=? ORDER BY updated_at DESC LIMIT 2000",
       [sesi.schoolId!, data.modul],

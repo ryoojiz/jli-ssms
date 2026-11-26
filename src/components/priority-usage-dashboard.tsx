@@ -17,7 +17,8 @@ export function PriorityUsageDashboard() {
   const { sesi } = useAuth();
   const priority = usePriorityDemo();
   const workflow = useDemoWorkflow();
-  if (!sesi || !["kepala_sekolah", "operator", "auditor"].includes(sesi.peran)) return null;
+  if (!sesi || !["kepala_sekolah", "operator", "auditor", "pusat"].includes(sesi.peran))
+    return null;
 
   const usage = summarizePriorityUsage(priority, workflow);
   const cards = [
@@ -79,7 +80,7 @@ export function PriorityUsageDashboard() {
         {cards.map((card) => {
           const Icon = card.icon;
           return (
-            <Card key={card.label} className="gap-0 p-4">
+            <Card key={card.label} className="flex h-full flex-col gap-0 p-4">
               <div className="flex items-start justify-between gap-2">
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {card.label}
@@ -90,13 +91,15 @@ export function PriorityUsageDashboard() {
               </div>
               <p className="mt-3 text-2xl font-bold tabular-nums text-foreground">{card.value}</p>
               <p className="text-xs text-muted-foreground">{card.unit}</p>
-              <p className="mt-2 flex-1 text-xs text-muted-foreground">{card.details}</p>
-              <Link
-                to={card.to}
-                className="mt-3 text-xs font-semibold text-primary hover:underline"
-              >
-                Lihat modul →
-              </Link>
+              <div className="mt-auto pt-2">
+                <p className="text-xs text-muted-foreground">{card.details}</p>
+                <Link
+                  to={card.to}
+                  className="mt-3 inline-block text-xs font-semibold text-primary hover:underline"
+                >
+                  Lihat modul →
+                </Link>
+              </div>
             </Card>
           );
         })}

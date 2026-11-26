@@ -71,7 +71,7 @@ export function GradebookDemo() {
         : a.classId === visibleClass) &&
       (!sesi.guruId ||
         a.teacherId === sesi.guruId ||
-        ["operator", "kepala_sekolah", "auditor"].includes(sesi.peran)),
+        ["operator", "kepala_sekolah", "auditor", "pusat"].includes(sesi.peran)),
   );
   const weights = state.weights.find(
     (w) => w.classId === visibleClass && w.subject === subject && w.semester === semester,

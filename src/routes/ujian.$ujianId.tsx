@@ -43,7 +43,7 @@ function InputNilaiUjian() {
 
   if (
     !sesi ||
-    !["guru", "wali_kelas", "operator", "kepala_sekolah", "auditor"].includes(sesi.peran)
+    !["guru", "wali_kelas", "operator", "kepala_sekolah", "auditor", "pusat"].includes(sesi.peran)
   ) {
     return (
       <AppShell>

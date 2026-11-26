@@ -37,14 +37,15 @@ export const getPrioritySnapshot = createServerFn({ method: "GET" }).handler(asy
   const read = async (sql: string, params: Array<string | number> = []) =>
     (await db.execute<RowDataPacket[]>(sql, params))[0];
   const own = (createdBy: string) => createdBy === sesi.email.toLowerCase();
-  const admin = ["operator", "sarpras", "kepala_sekolah", "auditor"].includes(sesi.peran);
-  const gradeAdmin = ["operator", "kepala_sekolah", "auditor"].includes(sesi.peran);
+  const admin = ["operator", "sarpras", "kepala_sekolah", "auditor", "pusat"].includes(sesi.peran);
+  const gradeAdmin = ["operator", "kepala_sekolah", "auditor", "pusat"].includes(sesi.peran);
   const stockVisible = [
     "operator",
     "sarpras",
     "bendahara",
     "kepala_sekolah",
     "auditor",
+    "pusat",
     "guru",
     "wali_kelas",
   ].includes(sesi.peran);
@@ -67,6 +68,7 @@ export const getPrioritySnapshot = createServerFn({ method: "GET" }).handler(asy
     "operator",
     "kepala_sekolah",
     "auditor",
+    "pusat",
   ].includes(sesi.peran)
     ? await read("SELECT * FROM room_bookings WHERE school_id=? ORDER BY created_at DESC", [sid])
     : [];
@@ -108,7 +110,7 @@ export const getPrioritySnapshot = createServerFn({ method: "GET" }).handler(asy
         ])
       : [];
   const weights = await read("SELECT * FROM grade_weights WHERE school_id=?", [sid]);
-  const notes = ["kepala_sekolah", "operator", "auditor"].includes(sesi.peran)
+  const notes = ["kepala_sekolah", "operator", "auditor", "pusat"].includes(sesi.peran)
     ? await read("SELECT * FROM teacher_kpi_notes WHERE school_id=? ORDER BY created_at DESC", [
         sid,
       ])
@@ -251,7 +253,7 @@ export const getPrioritySnapshot = createServerFn({ method: "GET" }).handler(asy
     bookings: bookings
       .filter(
         (r) =>
-          ["pustakawan", "operator", "kepala_sekolah", "auditor"].includes(sesi.peran) ||
+          ["pustakawan", "operator", "kepala_sekolah", "auditor", "pusat"].includes(sesi.peran) ||
           own(String(r["created_by"])),
       )
       .map((r) => ({
@@ -460,7 +462,7 @@ export const mutatePriority = createServerFn({ method: "POST" })
           break;
         }
         case "requestStock": {
-          if (["siswa", "walimurid", "auditor", "kepala_sekolah"].includes(role)) deny();
+          if (["siswa", "walimurid", "auditor", "pusat", "kepala_sekolah"].includes(role)) deny();
           const itemId = str(p["itemId"], 40),
             quantity = integer(p["quantity"]),
             note = str(p["note"], 300);

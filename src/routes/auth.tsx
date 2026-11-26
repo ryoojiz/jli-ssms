@@ -1,5 +1,5 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { LogIn } from "lucide-react";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ArrowLeft, LogIn } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useAuth } from "@/lib/auth-context";
@@ -69,7 +69,7 @@ function HalamanAuth() {
           <div className="flex items-center justify-between gap-6">
             <div className="flex items-center gap-3">
               <img
-                src={"/public/images/Jakarta.svg"}
+                src={"/images/Jakarta.svg"}
                 alt="Logo Pemerintah DKI Jakarta"
                 className="h-14 w-14 shrink-0 object-contain"
               />
@@ -90,7 +90,7 @@ function HalamanAuth() {
           <div>
             <div className="flex items-center gap-4">
               <img
-                src={"/public/images/JLI.png"}
+                src={"/images/JLI.png"}
                 alt="Logo JLI"
                 className="h-11 w-32 shrink-0 object-contain"
               />
@@ -109,7 +109,7 @@ function HalamanAuth() {
         <div className="w-full max-w-md">
           <div className="mb-8 flex items-center gap-3 lg:hidden">
             <img
-              src={"/public/images/Jakarta.svg"}
+              src={"/images/Jakarta.svg"}
               alt="Logo Pemerintah DKI Jakarta"
               className="h-12 w-12 shrink-0 object-contain"
             />
@@ -118,12 +118,18 @@ function HalamanAuth() {
               <p className="text-xs text-muted-foreground">Sekolah Negeri Jakarta</p>
             </div>
             <img
-              src={"/public/images/JLI.png"}
+              src={"/images/JLI.png"}
               alt="Logo JLI"
               className="ml-auto h-9 w-20 shrink-0 object-contain object-right"
             />
           </div>
 
+          <Link
+            to="/selamat-datang"
+            className="mb-4 inline-flex items-center gap-1 font-data text-xs text-muted-foreground hover:text-primary"
+          >
+            <ArrowLeft className="size-3" /> Kembali ke beranda
+          </Link>
           <h2 className="text-2xl font-bold text-foreground">Masuk ke akun sekolah</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Masukkan email dan kata sandi akun sekolah Anda.

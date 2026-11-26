@@ -25,6 +25,7 @@ import {
 import { AppShell, PageHeader, StatusPill, nadaStatus } from "@/components/app-shell";
 import { StatCard } from "@/components/stat-card";
 import { IntegrasiSistem } from "@/components/integrasi-sistem";
+import { BerandaPusat } from "@/components/pusat-dashboard";
 import { PriorityUsageDashboard } from "@/components/priority-usage-dashboard";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -74,6 +75,7 @@ export const Route = createFileRoute("/")({
 function CommandCenter() {
   const { sesi } = useAuth();
   const workflow = useDemoWorkflow();
+  if (sesi?.peran === "pusat") return <BerandaPusat />;
   if (sesi?.peran === "walimurid") return <BerandaWaliMurid />;
 
   const r = ringkasan();

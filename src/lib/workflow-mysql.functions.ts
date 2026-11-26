@@ -55,7 +55,7 @@ export const getWorkflowSnapshot = createServerFn({ method: "GET" }).handler(asy
     childClass = linked[0]?.["class_id"] ? String(linked[0]["class_id"]) : null;
     if (!childClass) throw new Error("Hubungan siswa tidak ditemukan.");
   }
-  const broad = ["operator", "kepala_sekolah", "auditor"].includes(sesi.peran);
+  const broad = ["operator", "kepala_sekolah", "auditor", "pusat"].includes(sesi.peran);
   const classId = sesi.peran === "wali_kelas" ? (sesi.classId ?? null) : null;
   const classes = await read(
     `SELECT c.id,c.name,c.grade,c.room,COALESCE(t.name,'-') AS homeroom,

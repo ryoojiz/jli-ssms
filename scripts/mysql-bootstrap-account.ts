@@ -22,6 +22,7 @@ const validRoles = new Set([
   "walimurid",
   "siswa",
   "auditor",
+  "pusat",
 ]);
 if (!url || !email || !name || !password || !schoolId || !role)
   throw new Error(
