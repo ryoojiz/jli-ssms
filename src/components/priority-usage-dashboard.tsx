@@ -2,6 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { BookOpen, Boxes, CalendarCheck, ChartNoAxesCombined, GraduationCap } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
+import { GAYA_AKSEN, type AksenKpi } from "@/components/stat-card";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { useDemoWorkflow } from "@/lib/workflow-store";
 import { usePriorityDemo } from "@/lib/priority-store";
@@ -28,6 +30,7 @@ export function PriorityUsageDashboard() {
       unit: "penyerahan",
       details: `${usage.warehouse.pending} permintaan menunggu · ${usage.warehouse.approvedCounts} opname disetujui`,
       icon: Boxes,
+      aksen: "warning" as const,
       to: "/inventaris" as const,
     },
     {
@@ -36,6 +39,7 @@ export function PriorityUsageDashboard() {
       unit: "catatan siswa–tanggal",
       details: `${usage.attendance.pendingRequests} permohonan izin/sakit menunggu`,
       icon: CalendarCheck,
+      aksen: "success" as const,
       to: "/kehadiran" as const,
     },
     {
@@ -44,6 +48,7 @@ export function PriorityUsageDashboard() {
       unit: "kunjungan terlaksana",
       details: `${usage.library.visitors} pengunjung tercatat · ${usage.library.pending} booking menunggu`,
       icon: BookOpen,
+      aksen: "info" as const,
       to: "/perpustakaan" as const,
     },
     {
@@ -52,6 +57,7 @@ export function PriorityUsageDashboard() {
       unit: "penilaian terbit",
       details: `${usage.grades.publishedScores} entri nilai terbit · ${usage.grades.drafts} draft`,
       icon: GraduationCap,
+      aksen: "primary" as const,
       to: "/akademik" as const,
     },
     {
@@ -60,6 +66,7 @@ export function PriorityUsageDashboard() {
       unit: "guru aktif menilai",
       details: `Kelengkapan ${ratio(usage.teacher.entriesDone, usage.teacher.entriesTotal)} · Tepat waktu ${ratio(usage.teacher.onTime, usage.teacher.deadlineTotal)}`,
       icon: ChartNoAxesCombined,
+      aksen: "danger" as const,
       to: "/analitik" as const,
     },
   ];
@@ -85,7 +92,12 @@ export function PriorityUsageDashboard() {
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {card.label}
                 </h3>
-                <span className="grid size-8 shrink-0 place-items-center rounded-md bg-accent text-accent-foreground">
+                <span
+                  className={cn(
+                    "grid size-8 shrink-0 place-items-center rounded-md",
+                    GAYA_AKSEN[card.aksen as AksenKpi],
+                  )}
+                >
                   <Icon className="size-4" aria-hidden />
                 </span>
               </div>

@@ -1,15 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import {
-  AlertTriangle,
   ArrowLeft,
   ArrowRight,
-  BookOpen,
   Building2,
   CalendarCheck,
   Cpu,
   GraduationCap,
   MapPin,
-  ShieldCheck,
+  UserCheck,
   Users,
   Wallet,
 } from "lucide-react";
@@ -18,8 +16,12 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
+  Legend,
   Line,
   LineChart,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -43,6 +45,14 @@ const rupiah = (n: number) =>
     currency: "IDR",
     maximumFractionDigits: 0,
   }).format(n);
+const rasio = (siswa: number, guru: number) => (guru > 0 ? `${(siswa / guru).toFixed(1)}` : "—");
+const WARNA_GRAFIK = [
+  "var(--color-primary)",
+  "var(--color-info)",
+  "var(--color-success)",
+  "var(--color-warning)",
+  "var(--color-destructive)",
+];
 
 function penggunaSnapshot() {
   const [data, setData] = useState<Snapshot | null>(null);
@@ -93,9 +103,11 @@ function StatusData({ sekolah }: { sekolah: Sekolah }) {
 function KartuRingkas({
   total,
   jumlahSekolah,
+  kehadiranGuru,
 }: {
   total: Snapshot["total"];
   jumlahSekolah: number;
+  kehadiranGuru: number;
 }) {
   return (
     <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -104,25 +116,49 @@ function KartuRingkas({
         nilai={bilangan(jumlahSekolah)}
         keterangan="Seluruh sekolah dalam sistem"
         icon={Building2}
+        aksen="primary"
       />
       <StatCard
         label="Total siswa"
         nilai={bilangan(total.siswa)}
-        keterangan={`${bilangan(total.guru)} guru · ${bilangan(total.rombel)} rombel`}
+        keterangan={`${bilangan(total.rombel)} rombel · kapasitas ${bilangan(total.kapasitas)} kursi`}
         icon={Users}
+        aksen="info"
       />
       <StatCard
-        label="Kehadiran rata-rata"
+        label="Rasio siswa : guru"
+        nilai={`1 : ${rasio(total.siswa, total.guru)}`}
+        keterangan={`${bilangan(total.siswa)} siswa · ${bilangan(total.guru)} guru`}
+        icon={GraduationCap}
+        aksen="success"
+      />
+      <StatCard
+        label="Kehadiran siswa"
         nilai={total.kehadiran}
         satuan="%"
-        keterangan={`${bilangan(total.kehadiranSampel)} catatan kehadiran`}
+        keterangan={`${bilangan(total.kehadiranSampel)} catatan presensi`}
         icon={CalendarCheck}
+        aksen="success"
       />
       <StatCard
-        label="Rata-rata nilai"
-        nilai={total.nilai}
-        keterangan={`${bilangan(total.nilaiSampel)} nilai tercatat`}
-        icon={GraduationCap}
+        label="Kehadiran guru"
+        nilai={kehadiranGuru > 0 ? bilangan(kehadiranGuru) : "—"}
+        satuan={kehadiranGuru > 0 ? "check-in" : ""}
+        keterangan={
+          kehadiranGuru > 0
+            ? "Dari catatan smart gate / absensi"
+            : "Belum ada catatan presensi guru"
+        }
+        icon={UserCheck}
+        aksen="info"
+      />
+      <StatCard
+        label="Kapasitas sekolah"
+        nilai={total.utilisasi}
+        satuan="%"
+        keterangan={`${bilangan(total.siswa)} siswa dari ${bilangan(total.kapasitas)} kursi`}
+        icon={Building2}
+        aksen="warning"
       />
       <StatCard
         label="Serapan anggaran"
@@ -130,26 +166,148 @@ function KartuRingkas({
         satuan="%"
         keterangan={`${rupiah(total.realisasi)} dari ${rupiah(total.pagu)}`}
         icon={Wallet}
+        aksen="primary"
       />
       <StatCard
-        label="Insiden terbuka"
-        nilai={bilangan(total.insidenTerbuka)}
-        keterangan={`${bilangan(total.insiden)} insiden tercatat`}
-        icon={AlertTriangle}
-      />
-      <StatCard
-        label="Indikator perlu perhatian"
-        nilai={bilangan(total.kpiWaspada)}
-        keterangan={`${bilangan(total.kpi)} KPI dalam katalog`}
-        icon={ShieldCheck}
-      />
-      <StatCard
-        label="Perangkat & kunjungan UKS"
-        nilai={`${bilangan(total.perangkat)}/${bilangan(total.kunjunganUks)}`}
-        keterangan="Perangkat aktif · kunjungan tercatat"
+        label="Perangkat online"
+        nilai={`${bilangan(total.perangkatOnline)}/${bilangan(total.perangkat)}`}
+        keterangan={`${bilangan(total.perangkat - total.perangkatOnline)} perangkat offline`}
         icon={Cpu}
+        aksen="info"
       />
     </section>
+  );
+}
+
+function SorotanPengawasan({ sekolah }: { sekolah: Sekolah[] }) {
+  const belumLapor = sekolah.filter((s) => !s.adaData).length;
+  const kelebihanKapasitas = sekolah.filter((s) => s.utilisasi > 100).length;
+  const rasioTertinggi = sekolah
+    .filter((s) => s.guru > 0)
+    .sort((a, b) => b.siswa / b.guru - a.siswa / a.guru)[0];
+  const perangkatOffline = sekolah.reduce((n, s) => n + (s.perangkat - s.perangkatOnline), 0);
+  return (
+    <Card className="p-5">
+      <h2 className="text-sm font-semibold text-foreground">Sorotan pengawasan</h2>
+      <p className="mb-4 text-xs text-muted-foreground">
+        Ringkasan yang perlu diperhatikan pimpinan tanpa daftar insiden atau status KPI operasional.
+      </p>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <p className="font-data text-[11px] uppercase tracking-wide text-muted-foreground">
+            Sekolah belum lapor
+          </p>
+          <p className="mt-1 text-xl font-semibold tabular-nums text-foreground">{belumLapor}</p>
+        </div>
+        <div>
+          <p className="font-data text-[11px] uppercase tracking-wide text-muted-foreground">
+            Sekolah di atas kapasitas
+          </p>
+          <p className="mt-1 text-xl font-semibold tabular-nums text-foreground">
+            {kelebihanKapasitas}
+          </p>
+        </div>
+        <div>
+          <p className="font-data text-[11px] uppercase tracking-wide text-muted-foreground">
+            Beban guru tertinggi
+          </p>
+          <p className="mt-1 text-xl font-semibold tabular-nums text-foreground">
+            {rasioTertinggi ? `1 : ${rasio(rasioTertinggi.siswa, rasioTertinggi.guru)}` : "—"}
+          </p>
+          {rasioTertinggi ? (
+            <p className="text-[11px] text-muted-foreground">{rasioTertinggi.nama}</p>
+          ) : null}
+        </div>
+        <div>
+          <p className="font-data text-[11px] uppercase tracking-wide text-muted-foreground">
+            Perangkat offline
+          </p>
+          <p className="mt-1 text-xl font-semibold tabular-nums text-foreground">
+            {bilangan(perangkatOffline)}
+          </p>
+        </div>
+      </div>
+      <p className="mt-4 text-[11px] text-muted-foreground">
+        Kapasitas dihitung 32 siswa per rombel bila kolom kapasitas belum diisi sekolah.
+      </p>
+    </Card>
+  );
+}
+
+const DERAJAT = Math.PI / 180;
+
+/** Menaruh persentase di tengah tiap sektor donut. */
+function labelPersenSektor(props: unknown) {
+  const { cx, cy, midAngle, innerRadius, outerRadius, percent, index } = props as {
+    cx: number;
+    cy: number;
+    midAngle: number;
+    innerRadius: number;
+    outerRadius: number;
+    percent: number;
+    index: number;
+  };
+  const jari = innerRadius + (outerRadius - innerRadius) * 0.62;
+  const x = cx + jari * Math.cos(-midAngle * DERAJAT);
+  const y = cy + jari * Math.sin(-midAngle * DERAJAT);
+  return (
+    <text
+      x={x}
+      y={y}
+      fill={index === 3 ? "var(--color-foreground)" : "#ffffff"}
+      textAnchor="middle"
+      dominantBaseline="central"
+      fontSize={11}
+      fontWeight={700}
+      style={{ pointerEvents: "none" }}
+    >
+      {`${Math.round(percent * 100)}%`}
+    </text>
+  );
+}
+
+function GrafikKomposisiGuru({
+  data,
+  judul = "Komposisi guru",
+}: {
+  data: Array<{ status: string; jumlah: number }>;
+  judul?: string;
+}) {
+  return (
+    <Card className="p-5">
+      <h2 className="text-sm font-semibold text-foreground">{judul}</h2>
+      <p className="mb-2 text-xs text-muted-foreground">
+        Berdasarkan status kepegawaian (PNS, PPPK, honorer, dan lainnya).
+      </p>
+      {data.length === 0 ? (
+        <p className="py-10 text-center text-xs text-muted-foreground">Belum ada data guru.</p>
+      ) : (
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={data}
+                dataKey="jumlah"
+                nameKey="status"
+                innerRadius={48}
+                outerRadius={88}
+                paddingAngle={2}
+                label={labelPersenSektor}
+                labelLine={false}
+              >
+                {data.map((_, i) => (
+                  <Cell key={i} fill={WARNA_GRAFIK[i % WARNA_GRAFIK.length]} />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{ borderRadius: 8, borderColor: "var(--color-border)", fontSize: 12 }}
+              />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </Card>
   );
 }
 
@@ -185,9 +343,9 @@ function GrafikTren({ tren }: { tren: Snapshot["tren"] }) {
   if (tren.length === 0) return null;
   return (
     <Card className="p-5">
-      <h2 className="text-sm font-semibold text-foreground">Tren indikator tercatat</h2>
+      <h2 className="text-sm font-semibold text-foreground">Tren kehadiran & anggaran</h2>
       <p className="mb-4 text-xs text-muted-foreground">
-        Rata-rata kehadiran, nilai, dan serapan dari data yang tersedia di sekolah.
+        Rata-rata kehadiran dan serapan dari data yang tersedia di sekolah.
       </p>
       <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
@@ -201,13 +359,6 @@ function GrafikTren({ tren }: { tren: Snapshot["tren"] }) {
               dataKey="kehadiran"
               name="Kehadiran (%)"
               stroke="var(--color-primary)"
-              strokeWidth={2}
-            />
-            <Line
-              type="monotone"
-              dataKey="nilai"
-              name="Nilai rata-rata"
-              stroke="var(--color-info)"
               strokeWidth={2}
             />
             <Line
@@ -243,12 +394,16 @@ function TabelSekolah({ sekolah }: { sekolah: Sekolah[] }) {
             </Link>
           ),
         },
-        { judul: "NPSN", render: (s) => s.npsn },
         { judul: "Siswa", kanan: true, render: (s) => bilangan(s.siswa) },
         { judul: "Guru", kanan: true, render: (s) => bilangan(s.guru) },
-        { judul: "Kehadiran", kanan: true, render: (s) => `${s.kehadiran}%` },
-        { judul: "Nilai", kanan: true, render: (s) => s.nilai },
-        { judul: "Serapan", kanan: true, render: (s) => `${s.serapan}%` },
+        { judul: "Rasio", kanan: true, render: (s) => `1 : ${rasio(s.siswa, s.guru)}` },
+        { judul: "Hadir", kanan: true, render: (s) => `${s.kehadiran}%` },
+        { judul: "Kapasitas", kanan: true, render: (s) => `${s.utilisasi}%` },
+        {
+          judul: "Perangkat",
+          kanan: true,
+          render: (s) => `${s.perangkatOnline}/${s.perangkat}`,
+        },
         { judul: "Status", render: (s) => <StatusData sekolah={s} /> },
         {
           judul: "Detail",
@@ -279,6 +434,14 @@ function Muat() {
   return <p className="py-10 text-center text-sm text-muted-foreground">Memuat data sekolah…</p>;
 }
 
+function Kosong({ pesan }: { pesan: string }) {
+  return (
+    <div className="m-3 rounded-md border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
+      {pesan}
+    </div>
+  );
+}
+
 /** Landing page eksekutif untuk akun pusat. */
 export function BerandaPusat() {
   const { data, galat } = penggunaSnapshot();
@@ -286,7 +449,7 @@ export function BerandaPusat() {
     <AppShell>
       <PageHeader
         judul="Ringkasan Eksekutif Sekolah"
-        deskripsi="Gambaran gabungan seluruh sekolah yang terdaftar, dengan akses drilldown per sekolah."
+        deskripsi="Gambaran gabungan seluruh sekolah, dengan fokus pada cakupan, kapasitas, dan kesiapan operasional."
         aksi={
           <Link
             to="/pusat"
@@ -300,11 +463,17 @@ export function BerandaPusat() {
       {!data && !galat ? <Muat /> : null}
       {data ? (
         <div className="space-y-6">
-          <KartuRingkas total={data.total} jumlahSekolah={data.sekolah.length} />
+          <KartuRingkas
+            total={data.total}
+            jumlahSekolah={data.sekolah.length}
+            kehadiranGuru={data.kehadiranGuru}
+          />
+          <SorotanPengawasan sekolah={data.sekolah} />
           <div className="grid gap-4 lg:grid-cols-2">
             <GrafikSekolah sekolah={data.sekolah} />
-            <GrafikTren tren={data.tren} />
+            <GrafikKomposisiGuru data={data.komposisiGuru} />
           </div>
+          <GrafikTren tren={data.tren} />
           <TabelSekolah sekolah={data.sekolah} />
         </div>
       ) : null}
@@ -319,7 +488,7 @@ export function DashboardPusat() {
     <AppShell>
       <PageHeader
         judul="Dashboard Pusat — Data Gabungan Sekolah"
-        deskripsi="Agregasi data seluruh sekolah untuk keperluan pelaporan dan pengawasan. Baca saja."
+        deskripsi="Agregasi data seluruh sekolah untuk pengawasan daerah. Baca saja."
       />
       {galat ? <MuatGagal galat={galat} /> : null}
       {!data && !galat ? <Muat /> : null}
@@ -330,11 +499,17 @@ export function DashboardPusat() {
             {new Date(data.dibuatPada).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })} WIB.
             Sekolah tanpa catatan ditampilkan dengan status “Belum ada data”.
           </p>
-          <KartuRingkas total={data.total} jumlahSekolah={data.sekolah.length} />
+          <KartuRingkas
+            total={data.total}
+            jumlahSekolah={data.sekolah.length}
+            kehadiranGuru={data.kehadiranGuru}
+          />
+          <SorotanPengawasan sekolah={data.sekolah} />
           <div className="grid gap-4 lg:grid-cols-2">
             <GrafikSekolah sekolah={data.sekolah} />
-            <GrafikTren tren={data.tren} />
+            <GrafikKomposisiGuru data={data.komposisiGuru} />
           </div>
+          <GrafikTren tren={data.tren} />
           <TabelSekolah sekolah={data.sekolah} />
         </div>
       ) : null}
@@ -387,25 +562,52 @@ export function DetailSekolahPusat({ schoolId }: { schoolId: string }) {
               nilai={bilangan(data.metrik.siswa)}
               keterangan={`${bilangan(data.metrik.rombel)} rombel`}
               icon={Users}
+              aksen="info"
             />
             <StatCard
               label="Guru"
               nilai={bilangan(data.metrik.guru)}
               keterangan="Tenaga pengajar tercatat"
               icon={GraduationCap}
+              aksen="primary"
             />
             <StatCard
-              label="Kehadiran"
+              label="Rasio siswa : guru"
+              nilai={`1 : ${rasio(data.metrik.siswa, data.metrik.guru)}`}
+              keterangan={`${bilangan(data.metrik.siswa)} siswa · ${bilangan(data.metrik.guru)} guru`}
+              icon={GraduationCap}
+              aksen="success"
+            />
+            <StatCard
+              label="Kapasitas kelas"
+              nilai={data.metrik.utilisasi}
+              satuan="%"
+              keterangan={`${bilangan(data.metrik.siswa)} dari ${bilangan(data.metrik.kapasitas)} kursi`}
+              icon={Building2}
+              aksen="warning"
+            />
+            <StatCard
+              label="Kehadiran siswa"
               nilai={data.metrik.kehadiran}
               satuan="%"
               keterangan={`${bilangan(data.metrik.kehadiranSampel)} catatan`}
               icon={CalendarCheck}
+              aksen="success"
             />
             <StatCard
-              label="Rata-rata nilai"
-              nilai={data.metrik.nilai}
-              keterangan={`${bilangan(data.metrik.nilaiSampel)} nilai`}
-              icon={BookOpen}
+              label="Kehadiran guru"
+              nilai={data.kehadiranGuru.length > 0 ? bilangan(data.kehadiranGuru.length) : "—"}
+              satuan={data.kehadiranGuru.length > 0 ? "hari" : ""}
+              keterangan="Hari dengan catatan masuk guru"
+              icon={UserCheck}
+              aksen="info"
+            />
+            <StatCard
+              label="Perangkat online"
+              nilai={`${bilangan(data.metrik.perangkatOnline)}/${bilangan(data.metrik.perangkat)}`}
+              keterangan={`${bilangan(data.metrik.perangkat - data.metrik.perangkatOnline)} offline`}
+              icon={Cpu}
+              aksen="info"
             />
             <StatCard
               label="Serapan anggaran"
@@ -413,61 +615,74 @@ export function DetailSekolahPusat({ schoolId }: { schoolId: string }) {
               satuan="%"
               keterangan={`${rupiah(data.metrik.realisasi)} dari ${rupiah(data.metrik.pagu)}`}
               icon={Wallet}
-            />
-            <StatCard
-              label="Insiden terbuka"
-              nilai={bilangan(data.metrik.insidenTerbuka)}
-              keterangan={`${bilangan(data.metrik.insiden)} insiden tercatat`}
-              icon={AlertTriangle}
-            />
-            <StatCard
-              label="Perangkat"
-              nilai={bilangan(data.metrik.perangkat)}
-              keterangan="CCTV, gate, sensor, dll."
-              icon={Cpu}
-            />
-            <StatCard
-              label="Audit trail"
-              nilai={bilangan(data.metrik.audit)}
-              keterangan="Peristiwa tercatat"
-              icon={ShieldCheck}
+              aksen="primary"
             />
           </section>
 
           <div className="grid gap-4 lg:grid-cols-2">
             <TabelData
-              judul="Siswa per kelas"
-              deskripsi="Jumlah siswa yang terdaftar pada masing-masing rombel."
+              judul="Siswa & kapasitas per kelas"
+              deskripsi="Perbandingan jumlah siswa dengan kapasitas rombel."
               data={data.kelas}
               kolom={[
                 { judul: "Kelas", render: (k) => k.nama },
-                { judul: "Tingkat", kanan: true, render: (k) => k.tingkat },
                 { judul: "Siswa", kanan: true, render: (k) => bilangan(k.siswa) },
+                { judul: "Kapasitas", kanan: true, render: (k) => bilangan(k.kapasitas) },
+                {
+                  judul: "Terisi",
+                  kanan: true,
+                  render: (k) => `${Math.round((k.siswa / Math.max(1, k.kapasitas)) * 100)}%`,
+                },
               ]}
             />
-            <TabelData
-              judul="Rata-rata nilai per mata pelajaran"
-              deskripsi="Dari nilai historis yang tersimpan di sekolah ini."
-              data={data.mapel}
-              kolom={[
-                { judul: "Mata pelajaran", render: (m) => m.nama },
-                { judul: "Jumlah nilai", kanan: true, render: (m) => bilangan(m.jumlah) },
-                { judul: "Rata-rata", kanan: true, render: (m) => m.rata },
-              ]}
-            />
+            <Card className="overflow-hidden p-0">
+              <div className="border-b border-border px-5 py-4">
+                <h2 className="text-sm font-semibold text-foreground">
+                  Kehadiran siswa per tanggal
+                </h2>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Persentase hadir dan terlambat dari catatan presensi.
+                </p>
+              </div>
+              {data.kehadiran.length === 0 ? (
+                <Kosong pesan="Belum ada catatan kehadiran siswa." />
+              ) : (
+                <TabelData
+                  judul="Presensi siswa"
+                  data={data.kehadiran}
+                  kolom={[
+                    { judul: "Tanggal", render: (h) => h.tanggal },
+                    { judul: "Catatan", kanan: true, render: (h) => bilangan(h.total) },
+                    { judul: "Hadir", kanan: true, render: (h) => `${h.persen}%` },
+                  ]}
+                />
+              )}
+            </Card>
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <TabelData
-              judul="Kehadiran per tanggal"
-              deskripsi="Persentase hadir dan terlambat dari catatan yang tersedia."
-              data={data.kehadiran}
-              kolom={[
-                { judul: "Tanggal", render: (h) => h.tanggal },
-                { judul: "Catatan", kanan: true, render: (h) => bilangan(h.total) },
-                { judul: "Hadir", kanan: true, render: (h) => `${h.persen}%` },
-              ]}
-            />
+            <Card className="overflow-hidden p-0">
+              <div className="border-b border-border px-5 py-4">
+                <h2 className="text-sm font-semibold text-foreground">
+                  Kehadiran guru per tanggal
+                </h2>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Dari catatan smart gate / absensi ASN yang tersedia.
+                </p>
+              </div>
+              {data.kehadiranGuru.length === 0 ? (
+                <Kosong pesan="Belum ada catatan kehadiran guru. Data akan muncul saat smart gate atau absensi ASN terhubung." />
+              ) : (
+                <TabelData
+                  judul="Presensi guru"
+                  data={data.kehadiranGuru}
+                  kolom={[
+                    { judul: "Tanggal", render: (h) => h.tanggal },
+                    { judul: "Guru masuk", kanan: true, render: (h) => bilangan(h.hadir) },
+                  ]}
+                />
+              )}
+            </Card>
             <TabelData
               judul="Serapan anggaran per program"
               deskripsi="Realisasi terhadap pagu yang tercatat."
@@ -481,34 +696,8 @@ export function DetailSekolahPusat({ schoolId }: { schoolId: string }) {
             />
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-3">
-            <TabelData
-              judul="Katalog KPI"
-              deskripsi="Indikator dan status capaian sekolah."
-              data={data.kpi}
-              kolom={[
-                { judul: "Indikator", render: (k) => k.nama },
-                { judul: "Nilai", kanan: true, render: (k) => k.nilai },
-                {
-                  judul: "Status",
-                  render: (k) => <StatusPill nada={nadaStatus(k.status)}>{k.status}</StatusPill>,
-                },
-              ]}
-            />
-            <TabelData
-              judul="Insiden keamanan"
-              deskripsi="Catatan insiden terbaru di sekolah ini."
-              data={data.insiden}
-              kolom={[
-                { judul: "Jenis", render: (i) => i.jenis },
-                { judul: "Lokasi", render: (i) => i.lokasi },
-                { judul: "Tingkat", render: (i) => i.tingkat },
-                {
-                  judul: "Status",
-                  render: (i) => <StatusPill nada={nadaStatus(i.status)}>{i.status}</StatusPill>,
-                },
-              ]}
-            />
+          <div className="grid gap-4 lg:grid-cols-2">
+            <GrafikKomposisiGuru data={data.komposisiGuru} judul="Komposisi guru sekolah ini" />
             <TabelData
               judul="Perangkat tercatat"
               deskripsi="Status perangkat smart school."
@@ -524,27 +713,16 @@ export function DetailSekolahPusat({ schoolId }: { schoolId: string }) {
             />
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-2">
-            <TabelData
-              judul="Komposisi guru"
-              deskripsi="Berdasarkan status kepegawaian."
-              data={data.guru}
-              kolom={[
-                { judul: "Status", render: (g) => g.status },
-                { judul: "Jumlah", kanan: true, render: (g) => bilangan(g.jumlah) },
-              ]}
-            />
-            <TabelData
-              judul="Aktivitas audit terbaru"
-              deskripsi="Riwayat perubahan data di sekolah ini."
-              data={data.audit}
-              kolom={[
-                { judul: "Aksi", render: (a) => a.aksi },
-                { judul: "Oleh", render: (a) => a.aktor },
-                { judul: "Waktu", render: (a) => a.waktu },
-              ]}
-            />
-          </div>
+          <TabelData
+            judul="Aktivitas audit terbaru"
+            deskripsi="Riwayat perubahan data di sekolah ini."
+            data={data.audit}
+            kolom={[
+              { judul: "Aksi", render: (a) => a.aksi },
+              { judul: "Oleh", render: (a) => a.aktor },
+              { judul: "Waktu", render: (a) => a.waktu },
+            ]}
+          />
         </div>
       ) : null}
     </AppShell>

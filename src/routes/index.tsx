@@ -103,12 +103,14 @@ function CommandCenter() {
           nilai={r.persenHadir}
           satuan="%"
           keterangan={`${rekap[0]!.jumlah} hadir · ${rekap[1]!.jumlah} terlambat · ${rekap[4]!.jumlah} alfa`}
+          aksen="success"
           icon={CalendarCheck}
         />
         <StatCard
           label="Siswa & guru aktif"
           nilai={r.totalSiswa}
           keterangan={`${r.totalGuru} guru · ${r.totalKelas} rombel`}
+          aksen="info"
           icon={Users}
         />
         <StatCard
@@ -116,12 +118,14 @@ function CommandCenter() {
           nilai={r.persenSerapan}
           satuan="%"
           keterangan={`${rupiah(r.totalRealisasi)} dari ${rupiah(r.totalPagu)}`}
+          aksen="warning"
           icon={Wallet}
         />
         <StatCard
           label="Perangkat IoT online"
           nilai={`${r.perangkatOnline}/${r.totalPerangkat}`}
           keterangan="CCTV, smart gate, RFID reader, sensor"
+          aksen="info"
           icon={Cpu}
         />
       </section>
@@ -133,24 +137,28 @@ function CommandCenter() {
           label="Tugas aktif"
           nilai={r.tugasAktif}
           keterangan="Menunggu pengumpulan siswa"
+          aksen="primary"
           icon={ClipboardList}
         />
         <StatCard
           label="Buku dipinjam"
           nilai={r.bukuDipinjam}
           keterangan="Termasuk 1 keterlambatan"
+          aksen="primary"
           icon={BookOpen}
         />
         <StatCard
           label="Kunjungan UKS"
           nilai={r.kunjunganUks}
           keterangan="1 rujukan ke Puskesmas"
+          aksen="warning"
           icon={HeartPulse}
         />
         <StatCard
           label="Insiden terbuka"
           nilai={r.insidenTerbuka}
           keterangan="Perlu tindak lanjut security"
+          aksen="danger"
           icon={AlertTriangle}
         />
       </section>
